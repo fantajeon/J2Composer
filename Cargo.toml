@@ -1,5 +1,5 @@
 [package]
-name = "j2yaml-composer"
+name = "j2composer"
 version = "0.1.0"
 edition = "2021"
 
