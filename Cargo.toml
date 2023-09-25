@@ -1,5 +1,5 @@
 [package]
-name = "j2composer"
+name = "jintemplify"
 version = "0.1.0"
 edition = "2021"
 description = "A tool to compose files using Jinja2 templates and YAML variables."

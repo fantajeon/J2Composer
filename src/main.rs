@@ -9,7 +9,9 @@ struct Args {
 }
 
 fn parse_arguments() -> Args {
-    let matches = App::new("j2yaml-composer")
+    let matches = App::new("jintemplify")
+        .about("A tool to compose files using Jinja2 templates and YAML variables.")
+        .long_about("jintemplify allows you to combine Jinja2 templates with YAML variables to produce files in any desired format. Use the --template argument to specify the main Jinja2 template and the --variables argument (optional) to specify the YAML variables template.")
         .arg(
             Arg::with_name("env")
                 .short("e")
