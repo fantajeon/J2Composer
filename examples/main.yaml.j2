@@ -1,0 +1,8 @@
+title: My name is {{ vars.var1 }}.
+
+items:
+- {{ vars.var2.sub_var2[0] | indent(prefix='  ', first=true)}}
+- {{ vars.var2.sub_var2[1]}}
+
+envs:
+    - {{ envs.var1 }}

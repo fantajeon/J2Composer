@@ -1,0 +1,21 @@
+[package]
+name = "j2composer"
+version = "0.1.0"
+edition = "2021"
+description = "A tool to compose files using Jinja2 templates and YAML variables."
+license = "MIT"
+repository = "https://github.com/fantajeon/J2composer"
+homepage = "https://github.com/fantajeon/J2compose"
+documentation = "https://github.com/fantajeon/J2compose"
+authors = ["Hyeokjune Jeon <fantajeon@gmail.com>"]
+exclude = ["tests/**", "examples/**"]
+
+[dependencies]
+tera = "1"
+clap = "2"
+serde_yaml = "0.8"
+serde = { version = "1.0", features = ["derive"] }
+
+[profile.release]
+opt-level = "z" # 최대 크기 최적화
+lto = true      # 링크 시간 최적화
