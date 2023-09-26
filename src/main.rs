@@ -1,5 +1,6 @@
 use clap::{App, Arg};
 use std::collections::HashMap;
+use std::env;
 use tera::{Context, Tera};
 
 struct Args {
@@ -21,6 +22,13 @@ fn parse_arguments() -> Args {
                 .help("Environment variables in the format key=value"),
         )
         .arg(
+            Arg::with_name("default-env")
+                .long("default-env")
+                .multiple(true)
+                .takes_value(true)
+                .help("Optional environment variables in the format key=default_value"),
+        )
+        .arg(
             Arg::with_name("template")
                 .short("t")
                 .long("template")
@@ -38,15 +46,35 @@ fn parse_arguments() -> Args {
         .get_matches();
 
     let mut envs = HashMap::new();
+    for (key, value) in env::vars() {
+        envs.insert(key, value);
+    }
 
     if let Some(values) = matches.values_of("env") {
         for value in values {
             let parts: Vec<&str> = value.splitn(2, '=').collect();
             if parts.len() == 2 {
-                envs.insert(parts[0].to_string(), parts[1].to_string());
+                let (key, val) = (parts[0].to_string(), parts[1].to_string());
+
+                envs.insert(key, val);
             } else {
                 eprintln!(
                     "Warning: Invalid format for --env '{}'. Expected format is key=value",
+                    value
+                );
+            }
+        }
+    }
+
+    if let Some(values) = matches.values_of("default-env") {
+        for value in values {
+            let parts: Vec<&str> = value.splitn(2, '=').collect();
+            if parts.len() == 2 {
+                let key = parts[0].to_string();
+                envs.entry(key).or_insert_with(|| parts[1].to_string());
+            } else {
+                eprintln!(
+                    "Warning: Invalid format for --default-env '{}'. Expected format is key=default_value",
                     value
                 );
             }
@@ -63,6 +91,7 @@ fn parse_arguments() -> Args {
 fn render_variables(
     tera: &mut Tera,
     variables_path: Option<&str>,
+    context: &Context,
 ) -> HashMap<String, serde_yaml::Value> {
     if variables_path.is_none() {
         return HashMap::new(); // 바로 빈 HashMap을 반환
@@ -75,7 +104,7 @@ fn render_variables(
         .expect("Failed to add variables template");
 
     let rendered_variables = tera
-        .render("variables", &Context::new())
+        .render("variables", context)
         .expect("Failed to render variables template");
     serde_yaml::from_str(&rendered_variables).expect("Failed to parse rendered variables")
 }
@@ -91,14 +120,21 @@ fn render_template(tera: &mut Tera, template_path: &str, context: &Context) -> S
 }
 fn main() {
     let args = parse_arguments();
-
     let mut tera = Tera::default();
     let mut context = Context::new();
-
-    context.insert("envs", &args.envs);
+    let mut global_vars: HashMap<String, serde_yaml::Value> = args
+        .envs
+        .iter()
+        .map(|(k, v)| (k.clone(), serde_yaml::Value::String(v.clone())))
+        .collect();
+    context.insert("vars", &global_vars);
 
     // Render variables
-    let global_vars = render_variables(&mut tera, args.variables.as_deref());
+    let rendered_vars = render_variables(&mut tera, args.variables.as_deref(), &context);
+
+    global_vars.extend(rendered_vars);
+
+    let mut context = Context::new();
     context.insert("vars", &global_vars);
 
     // Render main template
