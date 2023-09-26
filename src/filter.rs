@@ -1,9 +1,10 @@
 use std::collections::HashMap;
-use log::{debug};
+use log::{debug, info};
 use serde_json::Value;
 use tera::{Error, Result, Tera, Value as TeraValue};
 
 pub fn register_filters(tera: &mut Tera) {
+    info!("register builtin-filters");
     tera.register_filter("from_json", from_json_filter);
     tera.register_filter("from_yaml", from_yaml_filter);
     tera.register_filter("from_toml", from_toml_filter);

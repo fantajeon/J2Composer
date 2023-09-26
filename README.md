@@ -8,7 +8,9 @@
 - **Variable Support**: Combine your templates with YAML-defined variables.
 - **Plugin System (Shell Script Based)**: Extend the application's functionality with custom shell-script-based plugins. This allows for a wide range of extensibility using familiar scripting methods.
 
-## Plugin Structure
+# Advanced Templating Features
+
+## Plugins
 
 For those looking to extend the application's functionality with plugins, here's the basic structure for the plugin configuration:
 
@@ -23,9 +25,9 @@ In this structure:
 
 - `function_name` is the name of the function you're adding, which can be directly called within your Jinja2 templates.
 - `params` lists the parameters your function requires.
-- `script` contains the shell command that the function will execute when called.
+- `script` contains the shell command that the function will execute when called.es
 
-## Advanced Templating Features
+## Filters
 
 With `jintemplify`, you're not limited to just basic Jinja2 templating. We've introduced specialized filters and functions to provide more flexibility:
 
@@ -38,9 +40,19 @@ With `jintemplify`, you're not limited to just basic Jinja2 templating. We've in
 
 By using these filters, you can seamlessly integrate inline data within your templates and then manipulate them using Jinja2's powerful templating capabilities.
 
-### Example: Using read_file with JSON Parsing
+### Example: Using read_file in Plugin.yaml.jw with JSON Parsing
 
 One of the powerful combinations you can use in `jintemplify` is to read a file directly and then parse its content. Here's a quick example:
+
+```jinjna
+# plugin.yaml.j2
+read_file:
+  params:
+    - name: file_path
+      description: file path
+  script: cat $(file_path)
+
+```
 
 ```jinja
 {% set conf = read_file(file_path='./examples/test.json') | from_json %}
@@ -49,7 +61,17 @@ One of the powerful combinations you can use in `jintemplify` is to read a file 
 
 In this example, we're using the `read_file` function to read the contents of `test.json`. We then utilize the `from_json` filter to parse the read JSON string, converting it into a usable Jinja2 object. This allows you to directly access properties of the JSON, like `conf.hello` in the example above.
 
-## Installation
+# Installation
+
+## Using Cargo
+
+If you have Rust and Cargo installed, you can easily install `jintemplify` using:
+
+```bash
+cargo instll jintemplify
+```
+
+## Manual Installation
 
 1. Clone the repository:
 

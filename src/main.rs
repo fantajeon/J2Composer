@@ -13,12 +13,15 @@ use error::panic_hook;
 mod filter;
 mod render;
 use render::{render_template,render_variables};
+mod function;
 
 struct Args {
     envs: HashMap<String, String>,
     template: String,
     variables: Option<String>,
     plugin: Option<String>,
+    output_file: Option<String>,
+    disable_builtin_functions: bool,
 }
 
 fn parse_arguments() -> Args {
@@ -61,6 +64,18 @@ fn parse_arguments() -> Args {
                 .long("plugin")
                 .takes_value(true)
                 .help("Path to the plugin configuration: plugin.yaml"),
+        )
+        .arg(
+            Arg::with_name("output_file")
+                .long("output-file")
+                .value_name("FILE")
+                .help("Sets an output file, stdout if not set")
+                .takes_value(true),
+        )
+        .arg(
+            Arg::with_name("disable_builtin_functions")
+                .long("disable-builtin-functions")
+                .help("Disables the registration of built-in functions"),
         )
         .get_matches();
 
@@ -105,6 +120,8 @@ fn parse_arguments() -> Args {
         template: matches.value_of("template").unwrap().to_string(),
         variables: matches.value_of("variables").map(|s| s.to_string()),
         plugin: matches.value_of("plugin").map(|s| s.to_string()),
+        output_file: matches.value_of("output_file").map(ToOwned::to_owned),
+        disable_builtin_functions: matches.is_present("disable_builtin_functions"),
     }
 }
 
@@ -116,6 +133,9 @@ fn main() -> anyhow::Result<()> {
     let mut tera = Tera::default();
     let mut context = Context::new();
 
+    if !args.disable_builtin_functions {
+        function::register_functions(&mut tera);
+    }
     filter::register_filters(&mut tera);
     let mut global_vars: HashMap<String, serde_yaml::Value> = args
         .envs
@@ -149,7 +169,14 @@ fn main() -> anyhow::Result<()> {
     // Render main template
     info!("try main: {}", args.template);
     let rendered = render_template(&mut tera, &args.template, &context)?;
-    info!("{}", rendered);
+    match &args.output_file {
+        Some(output_path) => {
+            std::fs::write(output_path, &rendered).expect("Failed to write to output file");
+        }
+        None => {
+            println!("{}", rendered);
+        }
+    }
 
     Ok(())
 }
