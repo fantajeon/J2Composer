@@ -127,7 +127,7 @@ fn main() -> anyhow::Result<()> {
     if let Some(plugin_path) = &args.plugin {
         let plugins = Plugin::load_from_file(plugin_path, &mut tera, &context)?;
         for (name, plugin) in plugins.into_iter() {
-            // 플러그인 등록 논리 (Tera에 custom function 등록)
+            // Register Plugins
             let plugin_function = PluginFunction {
                 name: name.clone(),
                 params: plugin.params,
