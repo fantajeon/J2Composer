@@ -1,12 +1,12 @@
 [package]
 name = "jintemplify"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 description = "A tool to compose files using Jinja2 templates and YAML variables."
 license = "MIT"
-repository = "https://github.com/fantajeon/J2composer"
-homepage = "https://github.com/fantajeon/J2compose"
-documentation = "https://github.com/fantajeon/J2compose"
+repository = "https://github.com/fantajeon/jintemplify"
+homepage = "https://github.com/fantajeon/jintemplify"
+documentation = "https://github.com/fantajeon/jintemplify"
 authors = ["Hyeokjune Jeon <fantajeon@gmail.com>"]
 exclude = ["tests/**", "examples/**"]
 
