@@ -10,6 +10,17 @@
 
 # Advanced Templating Features
 
+## Accessing Environment Variables and Command Line Arguments
+
+Within Jinja2 templates, you can use the vars object to access environment variables or any values passed using the --env command line option. This provides a seamless way to incorporate dynamic values into your templates based on the environment or runtime conditions.
+
+```jinja2
+{{ vars.my_environment_variable }}
+{{ vars.my_cli_argument }}
+```
+
+In the above example, `my_environment_variable` could be an environment variable, and `my_cli_argument` could be a value passed via `--env`.
+
 ## Plugins
 
 For those looking to extend the application's functionality with plugins, here's the basic structure for the plugin configuration:
@@ -40,13 +51,13 @@ With `jintemplify`, you're not limited to just basic Jinja2 templating. We've in
 
 By using these filters, you can seamlessly integrate inline data within your templates and then manipulate them using Jinja2's powerful templating capabilities.
 
-### Example: Using read_file in Plugin.yaml.jw with JSON Parsing
+### Example: Using my_read_file in plugin.yaml.j2 with JSON Parsing
 
 One of the powerful combinations you can use in `jintemplify` is to read a file directly and then parse its content. Here's a quick example:
 
-```jinjna
-# plugin.yaml.j2
-read_file:
+```yaml
+{# plugin.yaml.j2 #}
+my_read_file:
   params:
     - name: file_path
       description: file path
@@ -55,8 +66,10 @@ read_file:
 ```
 
 ```jinja
-{% set conf = read_file(file_path='./examples/test.json') | from_json %}
+{# main.yaml.j2 #}
+{% set conf = my_read_file(file_path='./examples/test.json') | from_json %}
 {{conf.hello}}
+...
 ```
 
 In this example, we're using the `read_file` function to read the contents of `test.json`. We then utilize the `from_json` filter to parse the read JSON string, converting it into a usable Jinja2 object. This allows you to directly access properties of the JSON, like `conf.hello` in the example above.
