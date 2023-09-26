@@ -1,12 +1,19 @@
+// src/main.rs
 use clap::{App, Arg};
 use std::collections::HashMap;
 use std::env;
 use tera::{Context, Tera};
+mod plugin;
+use plugin::{Plugin, PluginFunction};
+mod error;
+use error::panic_hook;
+mod filter;
 
 struct Args {
     envs: HashMap<String, String>,
     template: String,
     variables: Option<String>,
+    plugin: Option<String>,
 }
 
 fn parse_arguments() -> Args {
@@ -42,6 +49,13 @@ fn parse_arguments() -> Args {
                 .long("variables")
                 .takes_value(true)
                 .help("Variables file: variables.yaml.j2"),
+        )
+        .arg(
+            Arg::with_name("plugin")
+                .short("p")
+                .long("plugin")
+                .takes_value(true)
+                .help("Path to the plugin configuration: plugin.yaml"),
         )
         .get_matches();
 
@@ -85,6 +99,7 @@ fn parse_arguments() -> Args {
         envs,
         template: matches.value_of("template").unwrap().to_string(),
         variables: matches.value_of("variables").map(|s| s.to_string()),
+        plugin: matches.value_of("plugin").map(|s| s.to_string()),
     }
 }
 
@@ -105,7 +120,8 @@ fn render_variables(
 
     let rendered_variables = tera
         .render("variables", context)
-        .expect("Failed to render variables template");
+        .map_err(|e| format!("Failed to render variables template:{}", e))
+        .unwrap();
     serde_yaml::from_str(&rendered_variables).expect("Failed to parse rendered variables")
 }
 
@@ -115,19 +131,37 @@ fn render_template(tera: &mut Tera, template_path: &str, context: &Context) -> S
     tera.add_raw_template(template_path, &template_content)
         .expect("Failed to add template");
 
-    tera.render(template_path, context)
-        .expect(format!("Failed to render template:{}", template_path).as_str())
+    tera.render(template_path, context).unwrap()
 }
+
 fn main() {
+    panic_hook();
+
     let args = parse_arguments();
     let mut tera = Tera::default();
     let mut context = Context::new();
+
+    filter::register_filters(&mut tera);
     let mut global_vars: HashMap<String, serde_yaml::Value> = args
         .envs
         .iter()
         .map(|(k, v)| (k.clone(), serde_yaml::Value::String(v.clone())))
         .collect();
     context.insert("vars", &global_vars);
+
+    if let Some(plugin_path) = &args.plugin {
+        let plugins = Plugin::load_from_file(plugin_path);
+        for (name, plugin) in plugins.into_iter() {
+            // 플러그인 등록 논리 (Tera에 custom function 등록)
+            let plugin_function = PluginFunction {
+                name: name.clone(),
+                params: plugin.params,
+                script: plugin.script,
+            };
+            tera.register_function(&name, plugin_function);
+            println!("Loaded and registered plugin: {}", name);
+        }
+    }
 
     // Render variables
     let rendered_vars = render_variables(&mut tera, args.variables.as_deref(), &context);
@@ -138,6 +172,7 @@ fn main() {
     context.insert("vars", &global_vars);
 
     // Render main template
+    println!("try main: {}", args.template);
     let rendered = render_template(&mut tera, &args.template, &context);
     println!("{}", rendered);
 }
