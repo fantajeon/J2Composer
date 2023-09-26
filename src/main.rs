@@ -1,13 +1,18 @@
 // src/main.rs
+use anyhow::{self};
 use clap::{App, Arg};
 use std::collections::HashMap;
 use std::env;
 use tera::{Context, Tera};
+use log::{info};
+
 mod plugin;
 use plugin::{Plugin, PluginFunction};
 mod error;
 use error::panic_hook;
 mod filter;
+mod render;
+use render::{render_template,render_variables};
 
 struct Args {
     envs: HashMap<String, String>,
@@ -103,38 +108,8 @@ fn parse_arguments() -> Args {
     }
 }
 
-fn render_variables(
-    tera: &mut Tera,
-    variables_path: Option<&str>,
-    context: &Context,
-) -> HashMap<String, serde_yaml::Value> {
-    if variables_path.is_none() {
-        return HashMap::new(); // 바로 빈 HashMap을 반환
-    }
-
-    let path = variables_path.unwrap();
-    let variables_content =
-        std::fs::read_to_string(path).expect("Failed to read variables template file");
-    tera.add_raw_template("variables", &variables_content)
-        .expect("Failed to add variables template");
-
-    let rendered_variables = tera
-        .render("variables", context)
-        .map_err(|e| format!("Failed to render variables template:{}", e))
-        .unwrap();
-    serde_yaml::from_str(&rendered_variables).expect("Failed to parse rendered variables")
-}
-
-fn render_template(tera: &mut Tera, template_path: &str, context: &Context) -> String {
-    let template_content =
-        std::fs::read_to_string(template_path).expect("Failed to read template file");
-    tera.add_raw_template(template_path, &template_content)
-        .expect("Failed to add template");
-
-    tera.render(template_path, context).unwrap()
-}
-
-fn main() {
+fn main() -> anyhow::Result<()> {
+    env_logger::init();
     panic_hook();
 
     let args = parse_arguments();
@@ -150,7 +125,7 @@ fn main() {
     context.insert("vars", &global_vars);
 
     if let Some(plugin_path) = &args.plugin {
-        let plugins = Plugin::load_from_file(plugin_path);
+        let plugins = Plugin::load_from_file(plugin_path, &mut tera, &context)?;
         for (name, plugin) in plugins.into_iter() {
             // 플러그인 등록 논리 (Tera에 custom function 등록)
             let plugin_function = PluginFunction {
@@ -159,12 +134,12 @@ fn main() {
                 script: plugin.script,
             };
             tera.register_function(&name, plugin_function);
-            println!("Loaded and registered plugin: {}", name);
+            info!("register_function: {}", name);
         }
     }
 
     // Render variables
-    let rendered_vars = render_variables(&mut tera, args.variables.as_deref(), &context);
+    let rendered_vars = render_variables(&mut tera, args.variables.as_deref(), &context)?;
 
     global_vars.extend(rendered_vars);
 
@@ -172,7 +147,9 @@ fn main() {
     context.insert("vars", &global_vars);
 
     // Render main template
-    println!("try main: {}", args.template);
-    let rendered = render_template(&mut tera, &args.template, &context);
-    println!("{}", rendered);
+    info!("try main: {}", args.template);
+    let rendered = render_template(&mut tera, &args.template, &context)?;
+    info!("{}", rendered);
+
+    Ok(())
 }

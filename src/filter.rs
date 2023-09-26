@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-
+use log::{debug};
 use serde_json::Value;
 use tera::{Error, Result, Tera, Value as TeraValue};
 
@@ -10,6 +10,7 @@ pub fn register_filters(tera: &mut Tera) {
 }
 
 fn from_json_filter(value: &TeraValue, _args: &HashMap<String, TeraValue>) -> Result<TeraValue> {
+    debug!("call from_json_filter");
     match value {
         TeraValue::String(s) => {
             let parsed: Value = serde_json::from_str(s)
@@ -21,6 +22,7 @@ fn from_json_filter(value: &TeraValue, _args: &HashMap<String, TeraValue>) -> Re
 }
 
 pub fn from_yaml_filter(value: &Value, _: &HashMap<String, Value>) -> Result<TeraValue> {
+    debug!("call from_yaml_filter");
     match value {
         Value::String(s) => match serde_yaml::from_str::<serde_json::Value>(s) {
             Ok(parsed) => Ok(Value::Object(parsed.as_object().unwrap().clone())),
@@ -31,6 +33,7 @@ pub fn from_yaml_filter(value: &Value, _: &HashMap<String, Value>) -> Result<Ter
 }
 
 pub fn from_toml_filter(value: &Value, _: &HashMap<String, Value>) -> Result<TeraValue> {
+    debug!("call from_toml_filter");
     match value {
         Value::String(s) => match toml::from_str::<serde_json::Value>(s) {
             Ok(parsed) => Ok(Value::Object(parsed.as_object().unwrap().clone())),

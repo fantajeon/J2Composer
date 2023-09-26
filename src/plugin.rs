@@ -1,8 +1,11 @@
 // src/plugin.rs
 use serde::Deserialize;
 use std::process::Command;
-use std::{collections::HashMap, fs};
-use tera::Function;
+use std::{collections::HashMap};
+use tera::{Function, Context, Tera};
+use anyhow::{self, Context as _Context};
+use crate::render::render_template;
+use log::{info, error, debug};
 
 #[derive(Debug, Deserialize)]
 pub struct Param {
@@ -26,11 +29,12 @@ pub struct PluginFunction {
 
 impl Function for PluginFunction {
     fn call(&self, args: &HashMap<String, tera::Value>) -> tera::Result<tera::Value> {
-        println!("call plugin.....: {}", self.name);
+        debug!("function call: {}, params={:?}", self.name, args);
         let mut cmd = self.script.clone();
 
         for param in &self.params {
             if !args.contains_key(&param.name) && param.default.is_none() {
+                error!("function call: {}, not provided param={}", self.name, param.name);
                 return Err(tera::Error::msg(format!(
                     "Parameter '{}' not provided for function '{}' and no default value is set.",
                     param.name, self.name
@@ -46,14 +50,14 @@ impl Function for PluginFunction {
             cmd = cmd.replace(&placeholder, &value_str);
         }
 
+        debug!("shell command: {}", cmd);
         let output = Command::new("sh").arg("-c").arg(&cmd).output();
         match &output {
-            Ok(_) => println!("Command executed successfully"),
-            Err(e) => println!("Error executing command: {}", e),
+            Ok(_) => info!("Command executed successfully: {}", cmd),
+            Err(e) => error!("Error executing command: {}", e),
         }
         let output = output
-            .map_err(|e| format!("Failed to execute command '{}': {}", cmd, e))
-            .expect("Failed to execute command");
+            .map_err(|e| tera::Error::msg(format!("Failed to execute command '{}': {}", cmd, e)))?;
 
         let output_str = String::from_utf8_lossy(&output.stdout);
         Ok(tera::Value::String(output_str.to_string()))
@@ -64,8 +68,8 @@ impl Function for PluginFunction {
 pub struct Plugin {}
 
 impl Plugin {
-    pub fn load_from_file(path: &str) -> HashMap<String, FunctionDeclartion> {
-        let content = fs::read_to_string(path).expect("Failed to read plugin file");
-        serde_yaml::from_str(&content).expect("Failed to parse plugin file")
+    pub fn load_from_file(path: &str, tera: &mut Tera, context: &Context) -> anyhow::Result<HashMap<String, FunctionDeclartion>> {
+        let content = render_template(tera, path, context)?;
+        serde_yaml::from_str(&content).context("Failed to parse plugin file")
     }
 }
