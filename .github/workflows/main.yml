@@ -20,10 +20,9 @@ jobs:
             su builder -c 'abuild-keygen -a -n' && \
             cp /home/builder/.abuild/*.rsa.pub /etc/apk/keys/ && \
             su builder -c 'abuild checksum' && \
-            su builder -c 'cat APKBUILD' && \
             su builder -c 'abuild -r'
           "
-          ls -al ./output/
+          tree /output/
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
