@@ -1,10 +1,10 @@
 // src/main.rs
 use anyhow::{self};
 use clap::{App, Arg};
+use log::info;
 use std::collections::HashMap;
 use std::env;
 use tera::{Context, Tera};
-use log::{info};
 
 mod plugin;
 use plugin::{Plugin, PluginFunction};
@@ -12,7 +12,7 @@ mod error;
 use error::panic_hook;
 mod filter;
 mod render;
-use render::{render_template,render_variables};
+use render::{render_template, render_variables};
 mod function;
 
 struct Args {
@@ -152,6 +152,7 @@ fn main() -> anyhow::Result<()> {
                 name: name.clone(),
                 params: plugin.params,
                 script: plugin.script,
+                env: plugin.env,
             };
             tera.register_function(&name, plugin_function);
             info!("register_function: {}", name);

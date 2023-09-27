@@ -4,3 +4,8 @@ my_read_file:
     - name: file_path
       description: file path
   script: cat $(file_path)
+
+my_echo:
+  env:
+    my_var: "hello plugin"
+  script: echo ${my_var}
