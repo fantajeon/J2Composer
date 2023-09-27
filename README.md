@@ -29,6 +29,9 @@ For those looking to extend the application's functionality with plugins, here's
 function_name:
   params:
     - name: parameter_name
+  env:
+    CC: clang
+    MAKEVARS: ...
   script: your_shell_script_command_here
 ```
 
@@ -36,6 +39,7 @@ In this structure:
 
 - `function_name` is the name of the function you're adding, which can be directly called within your Jinja2 templates.
 - `params` lists the parameters your function requires.
+- `env` sets environment variables that the shell command will have access to when executed. This is useful for customizing the behavior of your scripts based on the environment.
 - `script` contains the shell command that the function will execute when called.es
 
 ## Filters
