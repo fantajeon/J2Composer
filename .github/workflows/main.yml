@@ -1,7 +1,9 @@
 name: Build and Deploy APK
 
-on: [push]
+permissions:
+  contents: write
 
+on: [push]
 jobs:
   build:
     runs-on: ubuntu-latest
