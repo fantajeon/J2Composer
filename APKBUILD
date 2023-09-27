@@ -10,6 +10,7 @@ makedepends="cargo"
 install=""
 subpackages=""
 source="$pkgname-$pkgver.tar.gz::https://github.com/fantajeon/jintemplify/archive/refs/tags/v$pkgver.tar.gz"
+sha512sums=""
 
 build() {
     cd "$builddir"
