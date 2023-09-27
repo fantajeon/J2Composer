@@ -1,7 +1,9 @@
 name: Build and Deploy APK
 
-on: [push]
+permissions:
+  contents: write
 
+on: [push]
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -12,16 +14,21 @@ jobs:
 
       - name: Build APK package inside Alpine container
         run: |
-          docker run --rm -v $(pwd):/workspace -w /workspace alpine:latest /bin/ash -c "\
+          docker run --rm -v $(pwd):/workspace -v $(pwd)/output:/home/builder/packages -w /workspace alpine:latest /bin/ash -c "\
             apk add alpine-sdk cargo && \
-            abuild-keygen -a -i && \
-            abuild -r
+            adduser -D -G abuild builder && \
+            chown -R builder /workspace && \
+            chown -R builder /var/cache/distfiles/ && \
+            su builder -c 'abuild-keygen -a -n' && \
+            cp /home/builder/.abuild/*.rsa.pub /etc/apk/keys/ && \
+            su builder -c 'abuild checksum' && \
+            su builder -c 'abuild -r'
           "
+          tree $(pwd)/output/
 
-      - name: Deploy to GitHub Releases
-        uses: actions/upload-release-asset@v1
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
         with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ./jintemplify-*.apk
-          asset_name: jintemplify.apk
-          asset_content_type: application/vnd.alpine.package-archive
+          files: ./output/x86_64/jintemplify-*.apk
+          tag_name: ${{ github.ref }}

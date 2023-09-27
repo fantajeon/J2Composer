@@ -1,7 +1,7 @@
 pkgname=jintemplify
-pkgver=0.1.3 # 현재 프로젝트 버전에 따라 업데이트
+pkgver=0.1.3
 pkgrel=0
-pkgdesc="jintemplify is a versatile tool that enables users to combine Jinja2 templates with YAML variables, producing files in any desired format. The application also supports a plugin system based on shell scripts, allowing users to extend its functionality with familiar scripting techniques."
+pkgdesc="Template tool generating formats using Jinja2 & YAML"
 url="https://github.com/fantajeon/jintemplify"
 arch="all"
 license="MIT"
@@ -9,7 +9,7 @@ depends=""
 makedepends="cargo"
 install=""
 subpackages=""
-source="$pkgname-$pkgver.tar.gz::https://github.com/fantajeon/jintemplify/archive/refs/tags/$pkgver.tar.gz"
+source="$pkgname-$pkgver.tar.gz::https://github.com/fantajeon/jintemplify/archive/refs/tags/v$pkgver.tar.gz"
 
 build() {
     cd "$builddir"
@@ -20,3 +20,5 @@ package() {
     cd "$builddir"
     install -Dm755 target/release/jintemplify "$pkgdir/usr/bin/jintemplify"
 }
+
+sha512sums=""
