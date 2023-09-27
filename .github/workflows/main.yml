@@ -15,9 +15,9 @@ jobs:
           docker run --rm -v $(pwd):/workspace -w /workspace alpine:latest /bin/ash -c "\
             apk add alpine-sdk cargo && \
             adduser -D builder && \
-            echo 'builder ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers && \
-            sudo -u builder abuild-keygen -a -n && \
-            sudo -u builder abuild -r
+            abuild-keygen -a -n && \
+            chown -R builder /workspace && \
+            su builder -c 'abuild -r'
           "
 
       - name: Deploy to GitHub Releases
