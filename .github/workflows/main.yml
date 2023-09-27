@@ -10,19 +10,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Set up Alpine environment
-        uses: jirutka/setup-alpine@v1
-        with:
-          release: edge
-
-      - name: Install dependencies
+      - name: Build APK package inside Alpine container
         run: |
-          apk add alpine-sdk cargo
-
-      - name: Build APK package
-        run: |
-          abuild-keygen -a -i
-          abuild -r
+          docker run --rm -v $(pwd):/workspace -w /workspace alpine:latest /bin/ash -c "\
+            apk add alpine-sdk cargo && \
+            abuild-keygen -a -i && \
+            abuild -r
+          "
 
       - name: Deploy to GitHub Releases
         uses: actions/upload-release-asset@v1
