@@ -13,7 +13,6 @@ source="$pkgname-$pkgver.tar.gz::https://github.com/fantajeon/jintemplify/archiv
 
 build() {
     cd "$builddir"
-    ls -al
     cargo build --release
 }
 
