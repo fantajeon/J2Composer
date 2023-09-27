@@ -10,6 +10,10 @@ documentation = "https://github.com/fantajeon/jintemplify"
 authors = ["Hyeokjune Jeon <fantajeon@gmail.com>"]
 exclude = ["tests/**", "examples/**"]
 
+[[bin]]
+name = "jintemplify"
+path = "src/main.rs"
+
 [dependencies]
 tera = "1"
 clap = "2"
