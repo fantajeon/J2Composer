@@ -14,7 +14,7 @@ jobs:
         run: |
           docker run --rm -v $(pwd):/workspace -w /workspace alpine:latest /bin/ash -c "\
             apk add alpine-sdk cargo && \
-            adduser -D builder && \
+            adduser -D -G abuild builder && \
             chown -R builder /workspace && \
             chown -R builder /var/cache/distfiles/ && \
             su builder -c 'abuild-keygen -a -n' && \
