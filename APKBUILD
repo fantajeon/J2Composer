@@ -1,5 +1,5 @@
 pkgname=jintemplify
-pkgver=0.0.3
+pkgver=0.1.3
 pkgrel=0
 pkgdesc="Template tool generating formats using Jinja2 & YAML"
 url="https://github.com/fantajeon/jintemplify"
