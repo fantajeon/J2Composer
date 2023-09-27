@@ -9,7 +9,7 @@ depends=""
 makedepends="cargo"
 install=""
 subpackages=""
-source="$pkgname-$pkgver.tar.gz::https://github.com/fantajeon/jintemplify/archive/refs/tags/$pkgver.tar.gz"
+source="$pkgname-$pkgver.tar.gz::https://github.com/fantajeon/jintemplify/archive/refs/tags/v${pkgver}.tar.gz"
 
 build() {
     cd "$builddir"
