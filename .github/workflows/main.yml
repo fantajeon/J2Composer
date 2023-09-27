@@ -23,6 +23,7 @@ jobs:
             su builder -c 'cat APKBUILD' && \
             su builder -c 'abuild -r'
           "
+          ls -al ./output/
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
