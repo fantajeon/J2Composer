@@ -30,5 +30,3 @@ jobs:
         with:
           files: ./output/x86_64/jintemplify-*.apk
           tag_name: ${{ github.ref }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
