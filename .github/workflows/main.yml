@@ -22,7 +22,7 @@ jobs:
             su builder -c 'abuild checksum' && \
             su builder -c 'abuild -r'
           "
-          tree /output/
+          tree $(pwd)/output/
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
