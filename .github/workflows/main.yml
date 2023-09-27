@@ -24,10 +24,21 @@ jobs:
             su builder -c 'abuild -r'
           "
 
-      - name: Deploy to GitHub Releases
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload Release Asset
         uses: actions/upload-release-asset@v1
         with:
-          upload_url: ${{ github.event.release.upload_url }}
+          upload_url: ${{ steps.create_release.outputs.upload_url }} # 이 부분에서 upload_url을 설정합니다.
           asset_path: ./jintemplify-*.apk
           asset_name: jintemplify.apk
           asset_content_type: application/vnd.alpine.package-archive
