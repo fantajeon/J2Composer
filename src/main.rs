@@ -1,11 +1,12 @@
 // src/main.rs
 use anyhow::{self};
-use clap::{App, Arg};
+use clap::{Arg, ArgAction, Command};
+
 use log::{debug, info};
 use std::collections::HashMap;
 use std::env;
 use std::fs;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 use tera::{Context, Tera};
 mod plugin;
 use plugin::{Plugin, PluginFunction};
@@ -27,63 +28,61 @@ struct Args {
 }
 
 fn parse_arguments() -> Args {
-    let matches = App::new("jintemplify")
+    let matches = Command::new("jintemplify")
         .about("A tool to compose files using Jinja2 templates and YAML variables.")
         .long_about("jintemplify allows you to combine Jinja2 templates with YAML variables to produce files in any desired format. Use the --template argument to specify the main Jinja2 template and the --variables argument (optional) to specify the YAML variables template.")
         .arg(
-            Arg::with_name("env")
-                .short("e")
+            Arg::new("env")
+                .short('e')
                 .long("env")
-                .multiple(true)
-                .takes_value(true)
+                .action(ArgAction::Append)
                 .help("Environment variables in the format key=value"),
         )
         .arg(
-            Arg::with_name("default-env")
+            Arg::new("default-env")
                 .long("default-env")
-                .multiple(true)
-                .takes_value(true)
+                .action(ArgAction::Append)
                 .help("Optional environment variables in the format key=default_value"),
         )
         .arg(
-            Arg::with_name("template")
-                .short("t")
+            Arg::new("template")
+                .short('t')
                 .long("template")
                 .required(true)
-                .takes_value(true)
+                .action(ArgAction::Set)
                 .help("Template file: main.yaml.j2, main.txt.j2, main.json.j2"),
         )
         .arg(
-            Arg::with_name("variables")
-                .short("v")
+            Arg::new("variables")
+                .short('v')
                 .long("variables")
-                .takes_value(true)
+                .action(ArgAction::Set)
                 .help("Variables file: variables.yaml.j2"),
         )
         .arg(
-            Arg::with_name("plugin")
-                .short("p")
+            Arg::new("plugin")
+                .short('p')
                 .long("plugin")
-                .takes_value(true)
+                .action(ArgAction::Set)
                 .help("Path to the plugin configuration: plugin.yaml"),
         )
         .arg(
-            Arg::with_name("output_file")
+            Arg::new("output_file")
                 .long("output-file")
                 .value_name("FILE")
+                .action(ArgAction::Set)
                 .help("Sets an output file, stdout if not set")
-                .takes_value(true),
         )
         .arg(
-            Arg::with_name("disable_builtin_functions")
+            Arg::new("disable_builtin_functions")
                 .long("disable-builtin-functions")
+                .action(ArgAction::SetTrue)
                 .help("Disables the registration of built-in functions"),
         )
         .arg(
-            Arg::with_name("include-dir")
+            Arg::new("include-dir")
                 .long("include-dir")
-                .multiple(true)
-                .takes_value(true)
+                .action(ArgAction::Append)
                 .help("Include directory for templates. Format: /path/to/dir:alias or /path/to/dir. Use '{}' for direct naming without an alias."),
         )
         .get_matches();
@@ -93,39 +92,45 @@ fn parse_arguments() -> Args {
         envs.insert(key, value);
     }
 
-    if let Some(values) = matches.values_of("env") {
-        for value in values {
-            let parts: Vec<&str> = value.splitn(2, '=').collect();
-            if parts.len() == 2 {
-                let (key, val) = (parts[0].to_string(), parts[1].to_string());
+    let values = matches
+        .get_many::<String>("env")
+        .unwrap_or_default()
+        .map(|v| v.as_str())
+        .collect::<Vec<_>>();
+    for value in values {
+        let parts: Vec<&str> = value.splitn(2, '=').collect();
+        if parts.len() == 2 {
+            let (key, val) = (parts[0].to_string(), parts[1].to_string());
 
-                envs.insert(key, val);
-            } else {
-                eprintln!(
-                    "Warning: Invalid format for --env '{}'. Expected format is key=value",
-                    value
-                );
-            }
+            envs.insert(key, val);
+        } else {
+            eprintln!(
+                "Warning: Invalid format for --env '{}'. Expected format is key=value",
+                value
+            );
         }
     }
 
-    if let Some(values) = matches.values_of("default-env") {
-        for value in values {
-            let parts: Vec<&str> = value.splitn(2, '=').collect();
-            if parts.len() == 2 {
-                let key = parts[0].to_string();
-                envs.entry(key).or_insert_with(|| parts[1].to_string());
-            } else {
-                eprintln!(
-                    "Warning: Invalid format for --default-env '{}'. Expected format is key=default_value",
-                    value
-                );
-            }
+    let values = matches
+        .get_many::<String>("default-env")
+        .unwrap_or_default()
+        .map(|v| v.as_str())
+        .collect::<Vec<_>>();
+    for value in values {
+        let parts: Vec<&str> = value.splitn(2, '=').collect();
+        if parts.len() == 2 {
+            let key = parts[0].to_string();
+            envs.entry(key).or_insert_with(|| parts[1].to_string());
+        } else {
+            eprintln!(
+                "Warning: Invalid format for --default-env '{}'. Expected format is key=default_value",
+                value
+            );
         }
     }
 
     let include_dirs = matches
-        .values_of("include-dir")
+        .get_many::<String>("include-dir")
         .unwrap_or_default()
         .map(|s| {
             let parts: Vec<&str> = s.splitn(2, ':').collect();
@@ -135,11 +140,18 @@ fn parse_arguments() -> Args {
 
     Args {
         envs,
-        template: matches.value_of("template").unwrap().to_string(),
-        variables: matches.value_of("variables").map(|s| s.to_string()),
-        plugin: matches.value_of("plugin").map(|s| s.to_string()),
-        output_file: matches.value_of("output_file").map(ToOwned::to_owned),
-        disable_builtin_functions: matches.is_present("disable_builtin_functions"),
+        template: matches
+            .get_one::<String>("template")
+            .expect("required")
+            .to_string(),
+        variables: matches
+            .get_one::<String>("variables")
+            .map(|s| s.to_string()),
+        plugin: matches.get_one::<String>("plugin").map(|s| s.to_string()),
+        output_file: matches
+            .get_one::<String>("output_file")
+            .map(ToOwned::to_owned),
+        disable_builtin_functions: matches.get_flag("disable_builtin_functions"),
         include_dirs,
     }
 }

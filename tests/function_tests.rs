@@ -1,5 +1,4 @@
-use jintemplify::function::{register_functions, BuiltinFunction};
-use std::collections::HashMap;
+use jintemplify::function::register_functions;
 use tera::{Context, Tera};
 
 #[test]

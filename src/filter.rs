@@ -103,14 +103,6 @@ mod tests {
         assert!(from_toml_filter(&toml_str, &HashMap::new()).is_err());
     }
 
-    fn convert_tera_value_to_string(value: &TeraValue) -> Option<String> {
-        if let TeraValue::String(s) = value {
-            Some(s.clone())
-        } else {
-            None
-        }
-    }
-
     #[test]
     fn test_register_filters() {
         // Tera 인스턴스를 생성하고 필터를 등록
