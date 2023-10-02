@@ -1,6 +1,6 @@
-use std::collections::HashMap;
 use log::{debug, info};
 use serde_json::Value;
+use std::collections::HashMap;
 use tera::{Error, Result, Tera, Value as TeraValue};
 
 pub fn register_filters(tera: &mut Tera) {
@@ -41,5 +41,104 @@ pub fn from_toml_filter(value: &Value, _: &HashMap<String, Value>) -> Result<Ter
             Err(e) => Err(Error::msg(format!("Failed to parse TOML: {}", e))),
         },
         _ => Err(Error::msg("Value provided is not a string")),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use tera::Value as TeraValue;
+
+    #[test]
+    fn test_from_json_filter_valid() {
+        let json_str = TeraValue::String(r#"{"key": "value"}"#.to_string());
+        let result = from_json_filter(&json_str, &HashMap::new()).unwrap();
+        match result {
+            TeraValue::Object(map) => {
+                assert_eq!(map["key"], TeraValue::String("value".to_string()))
+            }
+            _ => panic!("Expected an Object!"),
+        }
+    }
+
+    #[test]
+    fn test_from_json_filter_invalid() {
+        let json_str = TeraValue::String(r#"{"key": "value""#.to_string());
+        assert!(from_json_filter(&json_str, &HashMap::new()).is_err());
+    }
+
+    #[test]
+    fn test_from_yaml_filter_valid() {
+        let yaml_str = TeraValue::String("key: value\n".to_string());
+        let result = from_yaml_filter(&yaml_str, &HashMap::new()).unwrap();
+        match result {
+            TeraValue::Object(map) => {
+                assert_eq!(map["key"], TeraValue::String("value".to_string()))
+            }
+            _ => panic!("Expected an Object!"),
+        }
+    }
+
+    #[test]
+    fn test_from_yaml_filter_invalid() {
+        let yaml_str = TeraValue::String("key: value:".to_string());
+        assert!(from_yaml_filter(&yaml_str, &HashMap::new()).is_err());
+    }
+
+    #[test]
+    fn test_from_toml_filter_valid() {
+        let toml_str = TeraValue::String("key = \"value\"\n".to_string());
+        let result = from_toml_filter(&toml_str, &HashMap::new()).unwrap();
+        match result {
+            TeraValue::Object(map) => {
+                assert_eq!(map["key"], TeraValue::String("value".to_string()))
+            }
+            _ => panic!("Expected an Object!"),
+        }
+    }
+
+    #[test]
+    fn test_from_toml_filter_invalid() {
+        let toml_str = TeraValue::String("key = value\n".to_string());
+        assert!(from_toml_filter(&toml_str, &HashMap::new()).is_err());
+    }
+
+    fn convert_tera_value_to_string(value: &TeraValue) -> Option<String> {
+        if let TeraValue::String(s) = value {
+            Some(s.clone())
+        } else {
+            None
+        }
+    }
+
+    #[test]
+    fn test_register_filters() {
+        // Tera 인스턴스를 생성하고 필터를 등록
+        let mut tera = Tera::default();
+        let context = tera::Context::new();
+        register_filters(&mut tera);
+
+        // JSON 필터 테스트
+        let template = r#"{% set t = '{"key": "value"}' | from_json %}{{t.key}}"#;
+        let rendered_output = tera.render_str(template, &context).unwrap();
+        assert_eq!(rendered_output, "value");
+
+        // YAML 필터 테스트
+        let rendered = tera
+            .render_str(
+                r#"{% set t = "key: value" | from_yaml %}{{t.key}}"#,
+                &context,
+            )
+            .unwrap();
+        assert_eq!(rendered, "value", "from_yaml");
+
+        // TOML 필터 테스트
+        let rendered = tera
+            .render_str(
+                r#"{% set t = "key = 'value'" | from_toml %}{{t.key}}"#,
+                &context,
+            )
+            .unwrap();
+        assert_eq!(rendered, "value", "form_toml");
     }
 }

@@ -17,3 +17,6 @@ Cargo.lock
 # Added by cargo
 
 /target
+test.txt
+Makefile
+.vscode/settings.json
