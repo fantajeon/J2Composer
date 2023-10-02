@@ -109,14 +109,52 @@ cargo build --release
 jintemplify -t <template_path> -v <variables_path> --plugin <plugin_path>
 ```
 
-- `-t, --template`: Specify the main Jinja2 template file.
-- `-v, --variables`: Specify the YAML variables template (optional).
-- `--plugin`: Specify the plugin YAML file to extend functionality.
-
-For more detailed information on each parameter, run:
-
 ```bash
 jintemplify --help
+```
+
+```plaintext
+jintemplify allows you to combine Jinja2 templates with YAML variables to produce files in any desired format. Use the
+--template argument to specify the main Jinja2 template and the --variables argument (optional) to specify the YAML
+variables template.
+
+USAGE:
+jintemplify [FLAGS] [OPTIONS] --template <template>
+
+FLAGS:
+--disable-builtin-functions
+ Disables the registration of built-in functions
+
+    -h, --help
+            Prints help information
+
+    -V, --version
+            Prints version information
+
+OPTIONS:
+--default-env <default-env>...
+ Optional environment variables in the format key=default_value
+
+    -e, --env <env>...
+            Environment variables in the format key=value
+
+        --include-dir <include-dir>...
+            Include directory for templates. Format: /path/to/dir:alias or /path/to/dir. Use '{}' for direct naming
+            without an alias.
+
+        --output-file <FILE>
+            Sets an output file, stdout if not set
+
+    -p, --plugin <plugin>
+            Path to the plugin configuration: plugin.yaml
+
+    -t, --template <template>
+            Template file: main.yaml.j2, main.txt.j2, main.json.j2
+
+    -v, --variables <variables>
+            Variables file: variables.yaml.j2
+
+for more detailed information on each parameter, run:
 ```
 
 ## Development
