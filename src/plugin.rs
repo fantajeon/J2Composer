@@ -93,3 +93,32 @@ impl Plugin {
         serde_yaml::from_str(&content).context("Failed to parse plugin file")
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use tera::Value;
+
+    #[test]
+    fn test_plugin_function_call() {
+        let func = PluginFunction {
+            name: "echo_test".to_string(),
+            params: Some(vec![Param {
+                name: "msg".to_string(),
+                description: "Echoes a message".to_string(),
+                default: None,
+            }]),
+            env: None,
+            script: "echo $(msg)".to_string(),
+        };
+
+        let mut args = HashMap::new();
+        args.insert(
+            "msg".to_string(),
+            Value::String("Hello, world!".to_string()),
+        );
+
+        let result = func.call(&args).unwrap();
+        assert_eq!(result, Value::String("Hello, world!\n".to_string()));
+    }
+}
