@@ -1,12 +1,18 @@
 {# main.yaml.j2 #}
+{% import "module.j2" as macros %}
 {% set conf = read_file(file_path='./examples/test.json') | from_json %}
-    title: My name is {{ vars.var1 }}.
-
+# title: My name is {{ vars.var1 }}.
+```yaml
 items:
 - {{ vars.var2.sub_var2[0] | indent(prefix='  ', first=true)}}
 - {{ vars.var2.sub_var2[1]}}
-- {{ my_read_file(file_path=vars.file_path) }}
 envs:
     - {{ vars.var1 }}
     - name: {{ conf.hello }}
     - name: {{ my_echo() }}
+```
+
+```json
+{{ my_read_file(file_path=vars.file_path) }}
+```
+{{- macros::build_list(articles=['article1', 'article2']) -}}
