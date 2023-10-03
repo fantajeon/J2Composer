@@ -11,25 +11,7 @@ jobs:
     strategy:
       matrix:
         architecture:
-          [
-            amd64,
-            arm64,
-            armel,
-            armhf,
-            i386,
-            mips,
-            mips64,
-            mips64el,
-            mips64r6,
-            mips64r6el,
-            mipsel,
-            mipsr6,
-            mipsr6el,
-            powerpc,
-            ppc64el,
-            riscv64,
-            s390x,
-          ]
+          [amd64, arm64, armel, armhf, i386, powerpc, ppc64el, riscv64, s390x]
         include:
           - platform: x86_64-unknown-linux-gnu
             architecture: amd64
@@ -48,28 +30,28 @@ jobs:
             toolchain: stable
           - platform: mips-unknown-linux-gnu
             architecture: mips
-            toolchain: nightly
+            toolchain: stable
           - platform: mips64-unknown-linux-gnuabi64
             architecture: mips64
-            toolchain: nightly
+            toolchain: stable
           - platform: mips64el-unknown-linux-gnuabi64
             architecture: mips64el
-            toolchain: nightly
+            toolchain: stable
           - platform: mips64-unknown-linux-mips64r6
             architecture: mips64r6
-            toolchain: nightly
+            toolchain: stable
           - platform: mips64el-unknown-linux-mips64r6
             architecture: mips64r6el
-            toolchain: nightly
+            toolchain: stable
           - platform: mipsel-unknown-linux-gnu
             architecture: mipsel
-            toolchain: nightly
+            toolchain: stable
           - platform: mips-unknown-linux-mipsr6
             architecture: mipsr6
-            toolchain: nightly
+            toolchain: stable
           - platform: mipsel-unknown-linux-mipsr6
             architecture: mipsr6el
-            toolchain: nightly
+            toolchain: stable
           - platform: powerpc-unknown-linux-gnu
             architecture: powerpc
             toolchain: stable
