@@ -39,7 +39,11 @@ jobs:
     strategy:
       matrix:
         architecture: [x86_64, arm64]
-        platform: [x86_64-apple-darwin, aarch64-apple-darwin]
+        include:
+          - platform: x86_64-apple-darwin
+            architecture: x86_64
+          - platform: aarch64-apple-darwin
+            architecture: arm64
 
     steps:
       - name: Checkout repository
