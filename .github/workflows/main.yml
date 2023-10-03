@@ -39,6 +39,7 @@ jobs:
     strategy:
       matrix:
         architecture: [x86_64, arm64]
+        platform: [x86_64-apple-darwin, aarch64-apple-darwin]
 
     steps:
       - name: Checkout repository
@@ -46,13 +47,13 @@ jobs:
 
       - name: Build on macOS for ${{ matrix.architecture }}
         run: |
-          rustup target add ${{ matrix.architecture }}-apple-darwin
-          cargo build --release --target ${{ matrix.architecture }}-apple-darwin
+          rustup target add ${{ matrix.platform }}
+          cargo build --release --target ${{ matrix.platform }}
 
       - name: Move macOS binary to output directory
         run: |
           mkdir -p payload/usr/local/bin/
-          cp ./target/${{ matrix.architecture }}-apple-darwin/release/jintemplify payload/usr/local/bin/
+          cp ./target/${{ matrix.platform }}/release/jintemplify payload/usr/local/bin/
           VERSION=$(./target/release/jintemplify --version | awk '{print $2}')
           echo "pkgbuild version=${VERSION}"
           pkgbuild --root payload --identifier com.supercoolai.jintemplify --version $VERSION jintemplify-${{ matrix.architecture }}.pkg
@@ -78,5 +79,6 @@ jobs:
         with:
           files: |
             ./alpine-apk/jintemplify-*.apk
-            ./macos-binary/jintemplify-*.pkg
+            ./macos-binary-x86_64/jintemplify-*.pkg
+            ./macos-binary-arm64/jintemplify-*.pkg
           tag_name: ${{ github.ref }}
