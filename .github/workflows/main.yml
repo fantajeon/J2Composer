@@ -75,13 +75,17 @@ jobs:
       - name: arm64
         if: matrix.architecture == 'arm64'
         run: |
+          TARGET=${{matrix.platform}} ./ci/install_rust.sh
           sudo apt-get update && sudo apt-get install -y --no-install-recommends \
             gcc libc6-dev ca-certificates \
             gcc-aarch64-linux-gnu libc6-dev-arm64-cross qemu-user
-          TARGET=${{matrix.platform}} ./ci/install_rust.sh
+          echo "CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=aarch64-linux-gnu-gcc" >> $GITHUB_ENV
+          echo "CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_RUNNER=\"qemu-aarch64 -L /usr/aarch64-linux-gnu\"" >> $GITHUB_ENV
+          echo "/rust/bin" >> $GITHUB_PATH
       - name: mips
         if: matrix.architecture == 'mips'
         run: |
+          TARGET=mips-unknown-linux-gnu ./ci/install_rust.sh
           sudo apt-get update && sudo apt-get install -y --no-install-recommends \
             gcc libc6-dev qemu-user ca-certificates \
             gcc-mips-linux-gnu libc6-dev-mips-cross \
@@ -93,7 +97,6 @@ jobs:
           echo "/rust/bin" >> $GITHUB_PATH
 
           ls -al
-          TARGET=mips-unknown-linux-gnu ./ci/install_rust.sh
 
       #- name: Install aarch64 toolchain
       #  if: matrix.platform == 'aarch64-unknown-linux-gnu'
