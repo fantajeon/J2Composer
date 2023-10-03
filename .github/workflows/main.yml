@@ -72,5 +72,5 @@ jobs:
         with:
           files: |
             ./alpine-apk/jintemplify-*.apk
-            ./macos-binary/jintemplify
+            ./macos-binary/jintemplify.pkg
           tag_name: ${{ github.ref }}
