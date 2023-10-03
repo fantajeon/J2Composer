@@ -1,6 +1,6 @@
 # Jintemplify
 
-`jintemplify` is a versatile tool that enables users to combine Jinja2 templates with YAML variables, producing files in any desired format. The application also supports a plugin system based on shell scripts, allowing users to extend its functionality with familiar scripting techniques.
+`jintemplify` is a versatile CLI(Command Line Interface) tool that enables users to combine Jinja2 templates with YAML variables, producing files in any desired format. The application also supports a plugin system based on shell scripts, allowing users to extend its functionality with familiar scripting techniques.
 
 ## Features
 
