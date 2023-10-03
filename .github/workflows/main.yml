@@ -70,6 +70,46 @@ jobs:
           if-no-files-found: error
           retention-days: 7
 
+  windows_build:
+    runs-on: windows-latest
+
+    strategy:
+      matrix:
+        architecture: [amd64, i386]
+        include:
+          - platform: x86_64-pc-windows-msvc
+            architecture: amd64
+          - platform: i686-pc-windows-msvc
+            architecture: i386
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Add Rust toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          target: ${{ matrix.platform }}
+          default: true
+
+      - name: Build on Windows for ${{ matrix.architecture }}
+        run: |
+          cargo build --release --target ${{ matrix.platform }}
+
+      - name: Move Windows binary to output directory
+        run: |
+          mkdir output
+          cp ./target/${{ matrix.platform }}/release/jintemplify.exe output/jintemplify-${{ matrix.architecture }}.exe
+
+      - name: Upload Windows artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: windows-binary-${{ matrix.architecture }}
+          path: output/jintemplify-${{ matrix.architecture }}.exe
+          if-no-files-found: error
+          retention-days: 7
+
   dist:
     needs: [macos_build, apline_build]
     runs-on: ubuntu-latest
@@ -85,4 +125,6 @@ jobs:
             ./alpine-apk/jintemplify-*.apk
             ./macos-binary-x86_64/jintemplify-*.pkg
             ./macos-binary-arm64/jintemplify-*.pkg
+            ./windows-binary-amd64/jintemplify-*.exe
+            ./windows-binary-i386/jintemplify-*.exe
           tag_name: ${{ github.ref }}
