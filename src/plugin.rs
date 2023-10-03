@@ -61,13 +61,8 @@ impl Function for FunctionDeclartion {
         }
 
         debug!("shell command: {}, env: {:?}", cmd, self.env);
-        let mut shell_cmd = Command::new("sh");
-        shell_cmd.arg("-c").arg(&cmd);
-        if let Some(env_vars) = &self.env {
-            for (key, value) in env_vars.iter() {
-                shell_cmd.env(key, value);
-            }
-        }
+        let mut shell_cmd = run_with_shebang(&cmd, self.env.as_ref())
+            .map_err(|e| tera::Error::msg(format!("Failed to execute command '{}': {}", cmd, e)))?;
 
         let output = shell_cmd.output();
 
