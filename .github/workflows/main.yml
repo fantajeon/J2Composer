@@ -102,7 +102,7 @@ jobs:
       - name: mips
         if: matrix.architecture == 'mips'
         run: |
-          apt-get update && apt-get install -y --no-install-recommends \
+          sudo apt-get update && apt-get install -y --no-install-recommends \
             gcc libc6-dev qemu-user ca-certificates \
             gcc-mips-linux-gnu libc6-dev-mips-cross \
             qemu-system-mips linux-headers-generic  \
