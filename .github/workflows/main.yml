@@ -13,7 +13,18 @@ jobs:
       fail-fast: false
       matrix:
         architecture:
-          [amd64, arm64, armel, armhf, i386, powerpc, ppc64el, riscv64, s390x]
+          [
+            amd64,
+            arm64,
+            armel,
+            armhf,
+            i386,
+            powerpc,
+            ppc64el,
+            riscv64,
+            s390x,
+            mips,
+          ]
         include:
           - platform: x86_64-unknown-linux-gnu
             architecture: amd64
@@ -83,17 +94,10 @@ jobs:
             architecture: s390x
             toolchain: stable
             CC: s390x-linux-gnu
-    #env:
-    #AR: ${{ matrix.CC }}-ar
-    #CHOST: ${{ matrix.CC }}
-    #CC: ${{ matrix.CC }}-gcc
-    #CPP: ${{ matrix.CC }}-cpp
-    #TARGET_CC: ${{matrix.CC}}-gcc
-    #TARGET_CXX: ${{matrix.CC}}-g++
     steps:
       - name: Install 32-bit libraries
         if: matrix.architecture == 'i386'
-        run: sudo apt-get update && sudo apt-get install gcc-multilib
+        run: apt-get update && sudo apt-get install gcc-multilib
 
       - name: mips
         if: matrix.architecture == 'mips'
