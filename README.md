@@ -38,11 +38,11 @@ function_name:
 In this structure:
 
 - `function_name` is the name of the function you're adding, which can be directly called within your Jinja2 templates.
-- `params` lists the parameters your function requires.
+- `params` lists the parameters your function or filter requires. For filters, the default input (representing the value being filtered) is accessed using `$(input)`.
 - `env` sets environment variables that the shell command will have access to when executed. This is useful for customizing the behavior of your scripts based on the environment.
-- `script` contains the shell command that the function will execute when called.es
+- `script` contains the shell command that the function will execute when called.
 
-## Filters
+## Filters and Functions
 
 With `jintemplify`, you're not limited to just basic Jinja2 templating. We've introduced specialized filters and functions to provide more flexibility:
 
@@ -61,11 +61,26 @@ One of the powerful combinations you can use in `jintemplify` is to read a file 
 
 ```yaml
 {# plugin.yaml.j2 #}
-my_read_file:
-  params:
-    - name: file_path
-      description: file path
-  script: cat $(file_path)
+functions:
+  - name: my_read_file
+    params:
+      - name: file_path
+        description: file path
+    script: cat $(file_path)
+
+  - name: my_echo
+    env:
+      my_var: "hello plugin"
+    script: echo ${my_var}
+
+filters:
+  - name: my_indent
+    params:
+      - name: prefix
+    description: "description for my filter"
+    script: |
+      #!/bin/bash
+      echo -e $(input) | sed 's/^/$(prefix)/'
 
 ```
 
@@ -73,7 +88,6 @@ my_read_file:
 {# main.yaml.j2 #}
 {% set conf = my_read_file(file_path='./examples/test.json') | from_json %}
 {{conf.hello}}
-...
 ```
 
 In this example, we're using the `read_file` function to read the contents of `test.json`. We then utilize the `from_json` filter to parse the read JSON string, converting it into a usable Jinja2 object. This allows you to directly access properties of the JSON, like `conf.hello` in the example above.
