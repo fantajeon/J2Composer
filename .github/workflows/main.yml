@@ -112,6 +112,7 @@ jobs:
           echo "CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=aarch64-linux-gnu-gcc" >> $GITHUB_ENV
           echo "/rust/bin" >> $GITHUB_PATH
 
+          ls -al
           TARGET=mips-unknown-linux-gnu ./ci/install_rust.sh
 
       #- name: Install aarch64 toolchain
