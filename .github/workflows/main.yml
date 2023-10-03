@@ -54,12 +54,12 @@ jobs:
       - name: Move Linux binary to output directory
         run: |
           mkdir -p linux-binary/${{ matrix.architecture }}
-          cp ./target/${{ matrix.platform }}/release/jintemplify linux-binary/${{ matrix.architecture }}/jintemplify-${{ matrix.architecture }}
+          cp ./target/${{ matrix.platform }}/release/jintemplify linux-binary/${{ matrix.architecture }}/jintemplify-linux-${{ matrix.architecture }}
       - name: Upload Linux artifact
         uses: actions/upload-artifact@v2
         with:
           name: linux-binary
-          path: linux-binary/${{ matrix.architecture }}/jintemplify-${{ matrix.architecture }}
+          path: linux-binary/${{ matrix.architecture }}/jintemplify-linux-${{ matrix.architecture }}
           if-no-files-found: error
           retention-days: 7
 
