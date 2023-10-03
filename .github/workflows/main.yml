@@ -9,6 +9,7 @@ jobs:
     runs-on: ubuntu-latest
 
     strategy:
+      fail-fast: false
       matrix:
         architecture:
           [amd64, arm64, armel, armhf, i386, powerpc, ppc64el, riscv64, s390x]
