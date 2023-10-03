@@ -67,6 +67,9 @@ jobs:
             toolchain: stable
 
     steps:
+      - name: Install 32-bit libraries
+        if: matrix.architecture == 'i386'
+        run: sudo apt-get update && sudo apt-get install gcc-multilib
       - name: Checkout repository
         uses: actions/checkout@v2
 
