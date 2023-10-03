@@ -33,38 +33,55 @@ jobs:
         include:
           - platform: x86_64-unknown-linux-gnu
             architecture: amd64
+            toolchain: stable
           - platform: aarch64-unknown-linux-gnu
             architecture: arm64
+            toolchain: stable
           - platform: arm-unknown-linux-gnueabi
             architecture: armel
+            toolchain: stable
           - platform: armv7-unknown-linux-gnueabihf
             architecture: armhf
+            toolchain: stable
           - platform: i686-unknown-linux-gnu
             architecture: i386
+            toolchain: stable
           - platform: mips-unknown-linux-gnu
             architecture: mips
+            toolchain: nightly
           - platform: mips64-unknown-linux-gnuabi64
             architecture: mips64
+            toolchain: nightly
           - platform: mips64el-unknown-linux-gnuabi64
             architecture: mips64el
+            toolchain: nightly
           - platform: mips64-unknown-linux-mips64r6
             architecture: mips64r6
+            toolchain: nightly
           - platform: mips64el-unknown-linux-mips64r6
             architecture: mips64r6el
+            toolchain: nightly
           - platform: mipsel-unknown-linux-gnu
             architecture: mipsel
+            toolchain: nightly
           - platform: mips-unknown-linux-mipsr6
             architecture: mipsr6
+            toolchain: nightly
           - platform: mipsel-unknown-linux-mipsr6
             architecture: mipsr6el
+            toolchain: nightly
           - platform: powerpc-unknown-linux-gnu
             architecture: powerpc
+            toolchain: stable
           - platform: powerpc64le-unknown-linux-gnu
             architecture: ppc64el
+            toolchain: stable
           - platform: riscv64gc-unknown-linux-gnu
             architecture: riscv64
+            toolchain: stable
           - platform: s390x-unknown-linux-gnu
             architecture: s390x
+            toolchain: stable
 
     steps:
       - name: Checkout repository
@@ -73,7 +90,7 @@ jobs:
       - name: Add Rust toolchain
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: stable
+          toolchain: ${{ matrix.toolchain }}
           target: ${{ matrix.platform }}
           default: true
 
