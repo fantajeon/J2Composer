@@ -58,7 +58,7 @@ jobs:
       - name: Upload Linux artifact
         uses: actions/upload-artifact@v2
         with:
-          name: linux-binary-${{ matrix.architecture }}
+          name: linux-binary
           path: linux-binary/${{ matrix.architecture }}/jintemplify-${{ matrix.architecture }}
           if-no-files-found: error
           retention-days: 7
@@ -123,7 +123,7 @@ jobs:
       - name: Upload macos artifact
         uses: actions/upload-artifact@v2
         with:
-          name: macos-binary-${{ matrix.architecture }}
+          name: macos-binary
           path: jintemplify-${{ matrix.architecture }}.pkg
           if-no-files-found: error
           retention-days: 7
@@ -163,7 +163,7 @@ jobs:
       - name: Upload Windows artifact
         uses: actions/upload-artifact@v2
         with:
-          name: windows-binary-${{ matrix.architecture }}
+          name: windows-binary
           path: output/jintemplify-${{ matrix.architecture }}.exe
           if-no-files-found: error
           retention-days: 7
@@ -181,9 +181,7 @@ jobs:
         with:
           files: |
             ./alpine-apk/jintemplify-*.apk
-            ./macos-binary-x86_64/jintemplify-*.pkg
-            ./macos-binary-arm64/jintemplify-*.pkg
-            ./windows-binary-amd64/jintemplify-*.exe
-            ./windows-binary-i386/jintemplify-*.exe
+            ./macos-binary/jintemplify-*.pkg
+            ./windows-binary/jintemplify-*.exe
             ./linux-binary/jintemplify-*
           tag_name: ${{ github.ref }}
