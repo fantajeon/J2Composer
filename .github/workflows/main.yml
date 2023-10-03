@@ -72,8 +72,8 @@ jobs:
         if: matrix.architecture == 'i386'
         run: sudo apt-get update && sudo apt-get install -y --no-install-recommends gcc-multilib
 
-      - name: aarch64
-        if: matrix.architecture == 'aarch64'
+      - name: arm64
+        if: matrix.architecture == 'arm64'
         run: |
           sudo apt-get update && sudo apt-get install -y --no-install-recommends \
             gcc libc6-dev ca-certificates \
