@@ -88,7 +88,6 @@ filters:
 {# main.yaml.j2 #}
 {% set conf = my_read_file(file_path='./examples/test.json') | from_json %}
 {{conf.hello}}
-...
 ```
 
 In this example, we're using the `read_file` function to read the contents of `test.json`. We then utilize the `from_json` filter to parse the read JSON string, converting it into a usable Jinja2 object. This allows you to directly access properties of the JSON, like `conf.hello` in the example above.
