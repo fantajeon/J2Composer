@@ -5,6 +5,94 @@ permissions:
 
 on: [push]
 jobs:
+  linux_build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        architecture:
+          [
+            amd64,
+            arm64,
+            armel,
+            armhf,
+            i386,
+            mips,
+            mips64,
+            mips64el,
+            mips64r6,
+            mips64r6el,
+            mipsel,
+            mipsr6,
+            mipsr6el,
+            powerpc,
+            ppc64el,
+            riscv64,
+            s390x,
+          ]
+        include:
+          - platform: x86_64-unknown-linux-gnu
+            architecture: amd64
+          - platform: aarch64-unknown-linux-gnu
+            architecture: arm64
+          - platform: arm-unknown-linux-gnueabi
+            architecture: armel
+          - platform: armv7-unknown-linux-gnueabihf
+            architecture: armhf
+          - platform: i686-unknown-linux-gnu
+            architecture: i386
+          - platform: mips-unknown-linux-gnu
+            architecture: mips
+          - platform: mips64-unknown-linux-gnuabi64
+            architecture: mips64
+          - platform: mips64el-unknown-linux-gnuabi64
+            architecture: mips64el
+          - platform: mips64-unknown-linux-mips64r6
+            architecture: mips64r6
+          - platform: mips64el-unknown-linux-mips64r6
+            architecture: mips64r6el
+          - platform: mipsel-unknown-linux-gnu
+            architecture: mipsel
+          - platform: mips-unknown-linux-mipsr6
+            architecture: mipsr6
+          - platform: mipsel-unknown-linux-mipsr6
+            architecture: mipsr6el
+          - platform: powerpc-unknown-linux-gnu
+            architecture: powerpc
+          - platform: powerpc64le-unknown-linux-gnu
+            architecture: ppc64el
+          - platform: riscv64gc-unknown-linux-gnu
+            architecture: riscv64
+          - platform: s390x-unknown-linux-gnu
+            architecture: s390x
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Add Rust toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          target: ${{ matrix.platform }}
+          default: true
+
+      - name: Build on Linux for ${{ matrix.architecture }}
+        run: |
+          cargo build --release --target ${{ matrix.platform }}
+
+      - name: Move Linux binary to output directory
+        run: |
+          mkdir -p linux-binary/${{ matrix.architecture }}
+          cp ./target/${{ matrix.platform }}/release/jintemplify linux-binary/${{ matrix.architecture }}/jintemplify-${{ matrix.architecture }}
+      - name: Upload Linux artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: linux-binary-${{ matrix.architecture }}
+          path: linux-binary/${{ matrix.architecture }}/jintemplify-${{ matrix.architecture }}
+          if-no-files-found: error
+          retention-days: 7
+
   apline_build:
     runs-on: ubuntu-latest
 
@@ -111,7 +199,7 @@ jobs:
           retention-days: 7
 
   dist:
-    needs: [macos_build, apline_build, windows_build]
+    needs: [macos_build, apline_build, windows_build, linux_build]
     runs-on: ubuntu-latest
     steps:
       - name: Download all artifacts
@@ -127,4 +215,5 @@ jobs:
             ./macos-binary-arm64/jintemplify-*.pkg
             ./windows-binary-amd64/jintemplify-*.exe
             ./windows-binary-i386/jintemplify-*.exe
+            ./linux-binary/jintemplify-*
           tag_name: ${{ github.ref }}
