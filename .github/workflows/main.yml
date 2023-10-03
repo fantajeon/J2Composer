@@ -131,6 +131,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Add Rust toolchain
+        if: matrix.architecture != 'mips'
         uses: actions-rs/toolchain@v1
         with:
           toolchain: ${{ matrix.toolchain }}
