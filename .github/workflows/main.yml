@@ -5,7 +5,7 @@ permissions:
 
 on: [push]
 jobs:
-  build:
+  apline_build:
     runs-on: ubuntu-latest
 
     steps:
@@ -25,10 +25,48 @@ jobs:
             su builder -c 'abuild -r'
           "
           tree $(pwd)/output/
+      - name: Upload Alpine APK
+        uses: actions/upload-artifact@v2
+        with:
+          name: alpine-apk
+          path: ./output/x86_64/jintemplify-*.apk
+          if-no-files-found: error
+          retention-days: 7
 
-      - name: Create Release
+  macos_build:
+    runs-on: macOS-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Build on macOS
+        run: |
+          cargo build --release
+      - name: Move macOS binary to output directory
+        run: |
+          mkdir -p output/macos
+          cp ./target/release/jintemplify output/macos/
+      - name: Upload macos artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: macos-binary
+          path: ./output/macos/jintemplify
+          if-no-files-found: error
+          retention-days: 7
+
+  dist:
+    needs: [macos_build, apline_build]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v2
+
+      - name: upload-artifacts
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
-          files: ./output/x86_64/jintemplify-*.apk
+          files: |
+            ./alpine-apk/jintemplify-*.apk
+            ./macos-binary/jintemplify
           tag_name: ${{ github.ref }}
