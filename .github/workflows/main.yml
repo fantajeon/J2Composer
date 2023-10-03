@@ -15,72 +15,55 @@ jobs:
         include:
           - platform: x86_64-unknown-linux-gnu
             architecture: amd64
-            CC: x86_64-linux-gnu
             toolchain: stable
           - platform: aarch64-unknown-linux-gnu
             architecture: arm64
-            CC: aarch64-linux-gnu
             toolchain: stable
-          - platform: arm-unknown-linux-gnueabi
-            architecture: armel
-            CC: arm-linux-gnueabi
-            toolchain: stable
-          - platform: armv7-unknown-linux-gnueabihf
-            architecture: armhf
-            CC: arm-linux-gnueabihf
-            toolchain: stable
+          #- platform: arm-unknown-linux-gnueabi
+          #  architecture: armel
+          #  toolchain: stable
+          #- platform: armv7-unknown-linux-gnueabihf
+          #  architecture: armhf
+          #  toolchain: stable
           - platform: i686-unknown-linux-gnu
             architecture: i386
             toolchain: stable
-            CC: i686-linux-gnu
-          - platform: mips-unknown-linux-gnu
-            architecture: mips
-            toolchain: stable
-            CC: mips-linux-gnu
+          #- platform: mips-unknown-linux-gnu
+          #  architecture: mips
+          #  toolchain: stable
           #- platform: mips64-unknown-linux-gnuabi64
           #  architecture: mips64
           #  toolchain: stable
-          #  CC: mips64-linux-gnuabi64
           #- platform: mips64el-unknown-linux-gnuabi64
           #  architecture: mips64el
           #  toolchain: stable
-          #  CC: mips64el-linux-gnuabi64
           #- platform: mips64-unknown-linux-mips64r6
           #  architecture: mips64r6
           #  toolchain: stable
-          #  CC: mipsisa64r6-linux-gnuabi64
           #- platform: mips64el-unknown-linux-mips64r6
           #  architecture: mips64r6el
           #  toolchain: stable
-          #  CC: mipsisa64r6el-linux-gnuabi64
           #- platform: mipsel-unknown-linux-gnu
           #  architecture: mipsel
           #  toolchain: stable
-          #  CC: mipsel-linux-gnu
           #- platform: mips-unknown-linux-mipsr6
           #  architecture: mipsr6
           #  toolchain: stable
-          #  CC: mipsisa32r6-linux-gnu
           #- platform: mipsel-unknown-linux-mipsr6
           #  architecture: mipsr6el
           #  toolchain: stable
-          #  CC: mipsisa32r6el-linux-gnu
           #- platform: powerpc-unknown-linux-gnu
           #  architecture: powerpc
           #  toolchain: stable
-          #  CC: powerpc-linux-gnu
           #- platform: powerpc64le-unknown-linux-gnu
           #  architecture: ppc64el
           #  toolchain: stable
-          #  CC: powerpc64le-linux-gnu
           #- platform: riscv64gc-unknown-linux-gnu
           #  architecture: riscv64
           #  toolchain: stable
-          #  CC: riscv64-linux-gnu
           #- platform: s390x-unknown-linux-gnu
           #  architecture: s390x
           #  toolchain: stable
-          #  CC: s390x-linux-gnu
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -89,6 +72,13 @@ jobs:
         if: matrix.architecture == 'i386'
         run: sudo apt-get update && sudo apt-get install -y --no-install-recommends gcc-multilib
 
+      - name: aarch64
+        if: matrix.architecture == 'aarch64'
+        run: |
+          sudo apt-get update && sudo apt-get install -y --no-install-recommends \
+            gcc libc6-dev ca-certificates \
+            gcc-aarch64-linux-gnu libc6-dev-arm64-cross qemu-user
+          TARGET=${{matrix.platform}} ./ci/install_rust.sh
       - name: mips
         if: matrix.architecture == 'mips'
         run: |
