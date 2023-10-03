@@ -90,7 +90,7 @@ jobs:
       CPP: ${{ matrix.CC }}-cpp
       TARGET_CC: ${{matrix.CC}}-gcc
       TARGET_CXX: ${{matrix.CC}}-g++
-      PATH: $PATH:/rust/bin
+      PATH: /rust/bin
       LDFLAGS: -s
       CARGO_TARGET_MIPS_UNKNOWN_LINUX_GNU_LINKER: mips-linux-gnu-gcc
       CARGO_TARGET_MIPS_UNKNOWN_LINUX_GNU_RUNNER: qemu-mips -L /usr/mips-linux-gnu"
