@@ -97,12 +97,12 @@ jobs:
     steps:
       - name: Install 32-bit libraries
         if: matrix.architecture == 'i386'
-        run: apt-get update && sudo apt-get install gcc-multilib
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends gcc-multilib
 
       - name: mips
         if: matrix.architecture == 'mips'
         run: |
-          sudo apt-get update && apt-get install -y --no-install-recommends \
+          sudo apt-get update && sudo apt-get install -y --no-install-recommends \
             gcc libc6-dev qemu-user ca-certificates \
             gcc-mips-linux-gnu libc6-dev-mips-cross \
             qemu-system-mips linux-headers-generic  \
