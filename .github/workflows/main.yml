@@ -30,7 +30,7 @@ jobs:
             toolchain: stable
           - platform: mips-unknown-linux-gnu
             architecture: mips
-            toolchain: stable
+            toolchain: nightly
           #- platform: mips64-unknown-linux-gnuabi64
           #  architecture: mips64
           #  toolchain: stable
