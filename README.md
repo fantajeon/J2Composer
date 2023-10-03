@@ -42,7 +42,7 @@ In this structure:
 - `env` sets environment variables that the shell command will have access to when executed. This is useful for customizing the behavior of your scripts based on the environment.
 - `script` contains the shell command that the function will execute when called.
 
-## Filters
+## Filters and Functions
 
 With `jintemplify`, you're not limited to just basic Jinja2 templating. We've introduced specialized filters and functions to provide more flexibility:
 
@@ -61,11 +61,26 @@ One of the powerful combinations you can use in `jintemplify` is to read a file 
 
 ```yaml
 {# plugin.yaml.j2 #}
-my_read_file:
-  params:
-    - name: file_path
-      description: file path
-  script: cat $(file_path)
+functions:
+  - name: my_read_file
+    params:
+      - name: file_path
+        description: file path
+    script: cat $(file_path)
+
+  - name: my_echo
+    env:
+      my_var: "hello plugin"
+    script: echo ${my_var}
+
+filters:
+  - name: my_indent
+    params:
+      - name: prefix
+    description: "description for my filter"
+    script: |
+      #!/bin/bash
+      echo -e $(input) | sed 's/^/$(prefix)/'
 
 ```
 
