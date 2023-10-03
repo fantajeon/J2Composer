@@ -165,6 +165,10 @@ To add new filters, modify `filter.rs`. For adding or modifying plugins, see `pl
 
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
 
+## Supported Platforms
+
+https://rust-lang.github.io/rustup-components-history/
+
 ## License
 
 [MIT](https://choosealicense.com/licenses/mit/)
