@@ -114,7 +114,6 @@ jobs:
       #    sudo apt-get install -y automake autoconf libtool crossbuild-essential-${{ matrix.architecture }}
 
       - name: Add Rust toolchain
-        if: matrix.architecture != 'mips'
         uses: actions-rs/toolchain@v1
         with:
           toolchain: ${{ matrix.toolchain }}
