@@ -54,12 +54,12 @@ jobs:
       - name: Move Linux binary to output directory
         run: |
           mkdir -p linux-binary/${{ matrix.architecture }}
-          cp ./target/${{ matrix.platform }}/release/jintemplify linux-binary/${{ matrix.architecture }}/jintemplify-${{ matrix.architecture }}
+          cp ./target/${{ matrix.platform }}/release/jintemplify linux-binary/${{ matrix.architecture }}/jintemplify-linux-${{ matrix.architecture }}
       - name: Upload Linux artifact
         uses: actions/upload-artifact@v2
         with:
           name: linux-binary
-          path: linux-binary/${{ matrix.architecture }}/jintemplify-${{ matrix.architecture }}
+          path: linux-binary/${{ matrix.architecture }}/jintemplify-linux-${{ matrix.architecture }}
           if-no-files-found: error
           retention-days: 7
 
@@ -118,13 +118,13 @@ jobs:
           cp ./target/${{ matrix.platform }}/release/jintemplify payload/usr/local/bin/
           VERSION=$(grep version Cargo.toml | head -1 | awk '{print $3}' | tr -d '"')
           echo "pkgbuild version=${VERSION}"
-          pkgbuild --root payload --identifier com.supercoolai.jintemplify --version $VERSION jintemplify-${{ matrix.architecture }}.pkg
+          pkgbuild --root payload --identifier com.supercoolai.jintemplify --version $VERSION jintemplify-macos-${{ matrix.architecture }}.pkg
 
       - name: Upload macos artifact
         uses: actions/upload-artifact@v2
         with:
           name: macos-binary
-          path: jintemplify-${{ matrix.architecture }}.pkg
+          path: jintemplify-macos-${{ matrix.architecture }}.pkg
           if-no-files-found: error
           retention-days: 7
 
@@ -158,13 +158,13 @@ jobs:
       - name: Move Windows binary to output directory
         run: |
           mkdir output
-          cp ./target/${{ matrix.platform }}/release/jintemplify.exe output/jintemplify-${{ matrix.architecture }}.exe
+          cp ./target/${{ matrix.platform }}/release/jintemplify.exe output/jintemplify-windows-${{ matrix.architecture }}.exe
 
       - name: Upload Windows artifact
         uses: actions/upload-artifact@v2
         with:
           name: windows-binary
-          path: output/jintemplify-${{ matrix.architecture }}.exe
+          path: output/jintemplify-windows-${{ matrix.architecture }}.exe
           if-no-files-found: error
           retention-days: 7
 
