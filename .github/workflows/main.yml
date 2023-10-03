@@ -177,7 +177,7 @@ jobs:
 
       - name: upload-artifacts
         uses: softprops/action-gh-release@v1
-        #if: startsWith(github.ref, 'refs/tags/')
+        if: startsWith(github.ref, 'refs/tags/')
         with:
           files: |
             ./alpine-apk/jintemplify-*.apk
