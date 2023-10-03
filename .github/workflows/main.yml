@@ -58,7 +58,7 @@ jobs:
       - name: Upload Linux artifact
         uses: actions/upload-artifact@v2
         with:
-          name: linux-binary-${{ matrix.architecture }}
+          name: linux-binary
           path: linux-binary/${{ matrix.architecture }}/jintemplify-${{ matrix.architecture }}
           if-no-files-found: error
           retention-days: 7
@@ -185,5 +185,5 @@ jobs:
             ./macos-binary-arm64/jintemplify-*.pkg
             ./windows-binary-amd64/jintemplify-*.exe
             ./windows-binary-i386/jintemplify-*.exe
-            ./linux-binary-*/jintemplify-*
+            ./linux-binary/jintemplify-*
           tag_name: ${{ github.ref }}
