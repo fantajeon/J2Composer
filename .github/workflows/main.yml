@@ -36,26 +36,32 @@ jobs:
   macos_build:
     runs-on: macOS-latest
 
+    strategy:
+      matrix:
+        architecture: [x86_64, arm64]
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Build on macOS
+      - name: Build on macOS for ${{ matrix.architecture }}
         run: |
-          cargo build --release
+          rustup target add ${{ matrix.architecture }}-apple-darwin
+          cargo build --release --target ${{ matrix.architecture }}-apple-darwin
+
       - name: Move macOS binary to output directory
         run: |
           mkdir -p payload/usr/local/bin/
-          cp ./target/release/jintemplify payload/usr/local/bin/
+          cp ./target/${{ matrix.architecture }}-apple-darwin/release/jintemplify payload/usr/local/bin/
           VERSION=$(./target/release/jintemplify --version | awk '{print $2}')
           echo "pkgbuild version=${VERSION}"
-          pkgbuild --root payload --identifier com.supercoolai.jintemplify --version $VERSION jintemplify.pkg
+          pkgbuild --root payload --identifier com.supercoolai.jintemplify --version $VERSION jintemplify-${{ matrix.architecture }}.pkg
 
       - name: Upload macos artifact
         uses: actions/upload-artifact@v2
         with:
-          name: macos-binary
-          path: jintemplify.pkg
+          name: macos-binary-${{ matrix.architecture }}
+          path: jintemplify-${{ matrix.architecture }}.pkg
           if-no-files-found: error
           retention-days: 7
 
@@ -72,5 +78,5 @@ jobs:
         with:
           files: |
             ./alpine-apk/jintemplify-*.apk
-            ./macos-binary/jintemplify.pkg
+            ./macos-binary/jintemplify-*.pkg
           tag_name: ${{ github.ref }}
