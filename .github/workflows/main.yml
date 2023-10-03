@@ -58,7 +58,7 @@ jobs:
         run: |
           mkdir -p payload/usr/local/bin/
           cp ./target/${{ matrix.platform }}/release/jintemplify payload/usr/local/bin/
-          VERSION=$(./target/release/jintemplify --version | awk '{print $2}')
+          VERSION=$(./target/${{ matrix.platform }}/jintemplify --version | awk '{print $2}')
           echo "pkgbuild version=${VERSION}"
           pkgbuild --root payload --identifier com.supercoolai.jintemplify --version $VERSION jintemplify-${{ matrix.architecture }}.pkg
 
