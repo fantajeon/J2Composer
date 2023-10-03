@@ -45,13 +45,15 @@ jobs:
           cargo build --release
       - name: Move macOS binary to output directory
         run: |
-          mkdir -p output/macos
-          cp ./target/release/jintemplify output/macos/
+          mkdir -p payload/usr/local/bin/
+          cp ./target/release/jintemplify payload/usr/local/bin/
+          pkgbuild --root payload --identifier com.supercoolai.jintemplify --version 1.0 jintemplify.pkg
+
       - name: Upload macos artifact
         uses: actions/upload-artifact@v2
         with:
           name: macos-binary
-          path: ./output/macos/jintemplify
+          path: payload/usr/local/bin/jintemplify.pkg
           if-no-files-found: error
           retention-days: 7
 
