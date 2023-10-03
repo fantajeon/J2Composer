@@ -90,7 +90,7 @@ jobs:
       CPP: ${{ matrix.CC }}-cpp
       TARGET_CC: ${{matrix.CC}}-gcc
       TARGET_CXX: ${{matrix.CC}}-g++
-      PATH: /rust/bin
+      PATH: $PATH:/rust/bin
       LDFLAGS: -s
       CARGO_TARGET_MIPS_UNKNOWN_LINUX_GNU_LINKER: mips-linux-gnu-gcc
       CARGO_TARGET_MIPS_UNKNOWN_LINUX_GNU_RUNNER: qemu-mips -L /usr/mips-linux-gnu"
@@ -105,7 +105,8 @@ jobs:
           apt-get update && apt-get install -y --no-install-recommends \
             gcc libc6-dev qemu-user ca-certificates \
             gcc-mips-linux-gnu libc6-dev-mips-cross \
-            qemu-system-mips linux-headers-generic
+            qemu-system-mips linux-headers-generic  \
+            tar
           echo "TARGET_CC=aarch64-linux-gnu-gcc" >> $GITHUB_ENV
           echo "TARGET_CXX=aarch64-linux-gnu-g++" >> $GITHUB_ENV
           echo "CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=aarch64-linux-gnu-gcc" >> $GITHUB_ENV
