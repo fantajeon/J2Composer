@@ -111,7 +111,7 @@ jobs:
           retention-days: 7
 
   dist:
-    needs: [macos_build, apline_build]
+    needs: [macos_build, apline_build, windows_build]
     runs-on: ubuntu-latest
     steps:
       - name: Download all artifacts
