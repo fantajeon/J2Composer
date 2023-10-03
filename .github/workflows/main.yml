@@ -28,9 +28,9 @@ jobs:
           - platform: i686-unknown-linux-gnu
             architecture: i386
             toolchain: stable
-          #- platform: mips-unknown-linux-gnu
-          #  architecture: mips
-          #  toolchain: stable
+          - platform: mips-unknown-linux-gnu
+            architecture: mips
+            toolchain: stable
           #- platform: mips64-unknown-linux-gnuabi64
           #  architecture: mips64
           #  toolchain: stable
@@ -85,7 +85,7 @@ jobs:
       - name: mips
         if: matrix.architecture == 'mips'
         run: |
-          TARGET=mips-unknown-linux-gnu ./ci/install_rust.sh
+          TARGET=${{matrix.platform}} ./ci/install_rust.sh
           sudo apt-get update && sudo apt-get install -y --no-install-recommends \
             gcc libc6-dev qemu-user ca-certificates \
             gcc-mips-linux-gnu libc6-dev-mips-cross \
