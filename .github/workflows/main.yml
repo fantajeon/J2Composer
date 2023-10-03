@@ -185,5 +185,5 @@ jobs:
             ./macos-binary-arm64/jintemplify-*.pkg
             ./windows-binary-amd64/jintemplify-*.exe
             ./windows-binary-i386/jintemplify-*.exe
-            ./linux-binary/jintemplify-*
+            ./linux-binary-*/jintemplify-*
           tag_name: ${{ github.ref }}
