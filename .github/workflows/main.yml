@@ -6,7 +6,8 @@ permissions:
 on: [push]
 jobs:
   linux_build:
-    runs-on: ubuntu-latest
+    # https://github.com/rust-lang/libc/tree/main/ci/docker
+    runs-on: ubuntu-22.04
 
     strategy:
       fail-fast: false
@@ -89,11 +90,21 @@ jobs:
       CPP: ${{ matrix.CC }}-cpp
       TARGET_CC: ${{matrix.CC}}-gcc
       TARGET_CXX: ${{matrix.CC}}-g++
+      PATH: $PATH:/rust/bin
       LDFLAGS: -s
+      CARGO_TARGET_MIPS_UNKNOWN_LINUX_GNU_LINKER: mips-linux-gnu-gcc
+      CARGO_TARGET_MIPS_UNKNOWN_LINUX_GNU_RUNNER: qemu-mips -L /usr/mips-linux-gnu"
     steps:
       - name: Install 32-bit libraries
         if: matrix.architecture == 'i386'
         run: sudo apt-get update && sudo apt-get install gcc-multilib
+
+      - name: mips
+        if: matrix.architecture == 'mips'
+        run: |
+          echo "TARGET_CC=aarch64-linux-gnu-gcc" >> $GITHUB_ENV
+          echo "TARGET_CXX=aarch64-linux-gnu-g++" >> $GITHUB_ENV
+          echo "CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=aarch64-linux-gnu-gcc" >> $GITHUB_ENV
 
       #- name: Install aarch64 toolchain
       #  if: matrix.platform == 'aarch64-unknown-linux-gnu'
