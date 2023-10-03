@@ -12,19 +12,6 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        architecture:
-          [
-            amd64,
-            arm64,
-            armel,
-            armhf,
-            i386,
-            powerpc,
-            ppc64el,
-            riscv64,
-            s390x,
-            mips,
-          ]
         include:
           - platform: x86_64-unknown-linux-gnu
             architecture: amd64
@@ -50,51 +37,54 @@ jobs:
             architecture: mips
             toolchain: stable
             CC: mips-linux-gnu
-          - platform: mips64-unknown-linux-gnuabi64
-            architecture: mips64
-            toolchain: stable
-            CC: mips64-linux-gnuabi64
-          - platform: mips64el-unknown-linux-gnuabi64
-            architecture: mips64el
-            toolchain: stable
-            CC: mips64el-linux-gnuabi64
-          - platform: mips64-unknown-linux-mips64r6
-            architecture: mips64r6
-            toolchain: stable
-            CC: mipsisa64r6-linux-gnuabi64
-          - platform: mips64el-unknown-linux-mips64r6
-            architecture: mips64r6el
-            toolchain: stable
-            CC: mipsisa64r6el-linux-gnuabi64
-          - platform: mipsel-unknown-linux-gnu
-            architecture: mipsel
-            toolchain: stable
-            CC: mipsel-linux-gnu
-          - platform: mips-unknown-linux-mipsr6
-            architecture: mipsr6
-            toolchain: stable
-            CC: mipsisa32r6-linux-gnu
-          - platform: mipsel-unknown-linux-mipsr6
-            architecture: mipsr6el
-            toolchain: stable
-            CC: mipsisa32r6el-linux-gnu
-          - platform: powerpc-unknown-linux-gnu
-            architecture: powerpc
-            toolchain: stable
-            CC: powerpc-linux-gnu
-          - platform: powerpc64le-unknown-linux-gnu
-            architecture: ppc64el
-            toolchain: stable
-            CC: powerpc64le-linux-gnu
-          - platform: riscv64gc-unknown-linux-gnu
-            architecture: riscv64
-            toolchain: stable
-            CC: riscv64-linux-gnu
-          - platform: s390x-unknown-linux-gnu
-            architecture: s390x
-            toolchain: stable
-            CC: s390x-linux-gnu
+          #- platform: mips64-unknown-linux-gnuabi64
+          #  architecture: mips64
+          #  toolchain: stable
+          #  CC: mips64-linux-gnuabi64
+          #- platform: mips64el-unknown-linux-gnuabi64
+          #  architecture: mips64el
+          #  toolchain: stable
+          #  CC: mips64el-linux-gnuabi64
+          #- platform: mips64-unknown-linux-mips64r6
+          #  architecture: mips64r6
+          #  toolchain: stable
+          #  CC: mipsisa64r6-linux-gnuabi64
+          #- platform: mips64el-unknown-linux-mips64r6
+          #  architecture: mips64r6el
+          #  toolchain: stable
+          #  CC: mipsisa64r6el-linux-gnuabi64
+          #- platform: mipsel-unknown-linux-gnu
+          #  architecture: mipsel
+          #  toolchain: stable
+          #  CC: mipsel-linux-gnu
+          #- platform: mips-unknown-linux-mipsr6
+          #  architecture: mipsr6
+          #  toolchain: stable
+          #  CC: mipsisa32r6-linux-gnu
+          #- platform: mipsel-unknown-linux-mipsr6
+          #  architecture: mipsr6el
+          #  toolchain: stable
+          #  CC: mipsisa32r6el-linux-gnu
+          #- platform: powerpc-unknown-linux-gnu
+          #  architecture: powerpc
+          #  toolchain: stable
+          #  CC: powerpc-linux-gnu
+          #- platform: powerpc64le-unknown-linux-gnu
+          #  architecture: ppc64el
+          #  toolchain: stable
+          #  CC: powerpc64le-linux-gnu
+          #- platform: riscv64gc-unknown-linux-gnu
+          #  architecture: riscv64
+          #  toolchain: stable
+          #  CC: riscv64-linux-gnu
+          #- platform: s390x-unknown-linux-gnu
+          #  architecture: s390x
+          #  toolchain: stable
+          #  CC: s390x-linux-gnu
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
       - name: Install 32-bit libraries
         if: matrix.architecture == 'i386'
         run: sudo apt-get update && sudo apt-get install -y --no-install-recommends gcc-multilib
@@ -129,9 +119,6 @@ jobs:
       #    sudo apt-get update
       #    sudo apt-get upgrade
       #    sudo apt-get install -y automake autoconf libtool crossbuild-essential-${{ matrix.architecture }}
-
-      - name: Checkout repository
-        uses: actions/checkout@v2
 
       - name: Add Rust toolchain
         if: matrix.architecture != 'mips'
