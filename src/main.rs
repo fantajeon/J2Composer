@@ -28,7 +28,9 @@ struct Args {
 }
 
 fn parse_arguments() -> Args {
+    let version = env!("CARGO_PKG_VERSION");
     let matches = Command::new("jintemplify")
+        .version(version)
         .about("A tool to compose files using Jinja2 templates and YAML variables.")
         .long_about("jintemplify allows you to combine Jinja2 templates with YAML variables to produce files in any desired format. Use the --template argument to specify the main Jinja2 template and the --variables argument (optional) to specify the YAML variables template.")
         .arg(
