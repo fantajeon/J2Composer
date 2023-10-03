@@ -83,17 +83,13 @@ jobs:
             architecture: s390x
             toolchain: stable
             CC: s390x-linux-gnu
-    env:
-      AR: ${{ matrix.CC }}-ar
-      CHOST: ${{ matrix.CC }}
-      CC: ${{ matrix.CC }}-gcc
-      CPP: ${{ matrix.CC }}-cpp
-      TARGET_CC: ${{matrix.CC}}-gcc
-      TARGET_CXX: ${{matrix.CC}}-g++
-      PATH: $PATH:/rust/bin
-      LDFLAGS: -s
-      CARGO_TARGET_MIPS_UNKNOWN_LINUX_GNU_LINKER: mips-linux-gnu-gcc
-      CARGO_TARGET_MIPS_UNKNOWN_LINUX_GNU_RUNNER: qemu-mips -L /usr/mips-linux-gnu"
+    #env:
+    #AR: ${{ matrix.CC }}-ar
+    #CHOST: ${{ matrix.CC }}
+    #CC: ${{ matrix.CC }}-gcc
+    #CPP: ${{ matrix.CC }}-cpp
+    #TARGET_CC: ${{matrix.CC}}-gcc
+    #TARGET_CXX: ${{matrix.CC}}-g++
     steps:
       - name: Install 32-bit libraries
         if: matrix.architecture == 'i386'
@@ -110,6 +106,7 @@ jobs:
           echo "TARGET_CC=aarch64-linux-gnu-gcc" >> $GITHUB_ENV
           echo "TARGET_CXX=aarch64-linux-gnu-g++" >> $GITHUB_ENV
           echo "CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=aarch64-linux-gnu-gcc" >> $GITHUB_ENV
+          echo "/rust/bin" >> $GITHUB_PATH
 
       #- name: Install aarch64 toolchain
       #  if: matrix.platform == 'aarch64-unknown-linux-gnu'
