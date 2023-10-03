@@ -15,4 +15,4 @@ envs:
 ```json
 {{ my_read_file(file_path=vars.file_path) }}
 ```
-{{- macros::build_list(articles=['article1', 'article2']) -}}
+{{- macros::build_list(articles=['article1', 'article2']) | my_indent(prefix="\t") -}}
