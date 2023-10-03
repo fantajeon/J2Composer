@@ -47,7 +47,8 @@ jobs:
         run: |
           mkdir -p payload/usr/local/bin/
           cp ./target/release/jintemplify payload/usr/local/bin/
-          pkgbuild --root payload --identifier com.supercoolai.jintemplify --version 1.0 jintemplify.pkg
+          VERSION=$(./target/release/jintemplify --version | awk '{print $2}')
+          pkgbuild --root payload --identifier com.supercoolai.jintemplify --version $VERSION jintemplify.pkg
 
       - name: Upload macos artifact
         uses: actions/upload-artifact@v2
