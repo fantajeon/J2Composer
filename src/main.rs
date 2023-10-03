@@ -9,7 +9,7 @@ use std::fs;
 use std::path::Path;
 use tera::{Context, Tera};
 mod plugin;
-use plugin::{Plugin, PluginFunction};
+use plugin::Plugin;
 mod error;
 use error::panic_hook;
 mod filter;
@@ -222,16 +222,22 @@ fn main() -> anyhow::Result<()> {
 
     if let Some(plugin_path) = &args.plugin {
         let plugins = Plugin::load_from_file(plugin_path, &mut tera, &context)?;
-        for (name, plugin) in plugins.into_iter() {
-            // Register Plugins
-            let plugin_function = PluginFunction {
-                name: name.clone(),
-                params: plugin.params,
-                script: plugin.script,
-                env: plugin.env,
-            };
-            tera.register_function(&name, plugin_function);
-            info!("register_function: {}", name);
+        if let Some(functions) = plugins.functions {
+            for func_decl in functions.into_iter() {
+                // Register Function Plugins
+                let name = func_decl.name.clone();
+                tera.register_function(&name, func_decl);
+                info!("register_function: {}", name);
+            }
+        }
+
+        if let Some(filters) = plugins.filters {
+            for filter_decl in filters.into_iter() {
+                // Register Filter Plugins
+                let name = filter_decl.name.clone();
+                tera.register_filter(&name, filter_decl);
+                info!("register_filter: {}", name);
+            }
         }
     }
 
