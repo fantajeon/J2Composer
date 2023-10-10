@@ -1,6 +1,6 @@
 {# main.yaml.j2 #}
 {% import "module.j2" as macros %}
-{% set conf = read_file(file_path='./examples/test.json') | from_json %}
+{% set conf = read_file(file_path='./examples/scratch/test.json') | from_json %}
 # title: My name is {{ vars.var1 }}.
 ```yaml
 items:
