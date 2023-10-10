@@ -1,0 +1,7 @@
+FROM ubuntu:latest
+
+{% if vars.stage == 'nightly' %}
+RUN {{vars.package.nightly_install}}
+{% else %}
+RUN {{vars.package.release_install}}
+{% endif %}
