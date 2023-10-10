@@ -26,18 +26,19 @@ In the above example, `my_environment_variable` could be an environment variable
 For those looking to extend the application's functionality with plugins, here's the basic structure for the plugin configuration:
 
 ```yaml
-function_name:
-  params:
-    - name: parameter_name
-  env:
-    CC: clang
-    MAKEVARS: ...
-  script: your_shell_script_command_here
+functions:
+  - name: "function_name"
+    params:
+      - name: parameter_name
+    env:
+      CC: clang
+      MAKEVARS: ...
+    script: your_shell_script_command_here
 ```
 
 In this structure:
 
-- `function_name` is the name of the function you're adding, which can be directly called within your Jinja2 templates.
+- `name` is the name of the function you're adding, which can be directly called within your Jinja2 templates.
 - `params` lists the parameters your function or filter requires. For filters, the default input (representing the value being filtered) is accessed using `$(input)`.
 - `env` sets environment variables that the shell command will have access to when executed. This is useful for customizing the behavior of your scripts based on the environment.
 - `script` contains the shell command that the function will execute when called.
