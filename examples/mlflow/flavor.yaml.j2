@@ -1,0 +1,7 @@
+{%- set package = [ "pip", shell(cmd="pip freeze") | trim | split(pat="\n") ] | to_object -%}
+my_module:
+  pip_list:
+    {% for p in package.pip -%}
+    - {{p}} 
+    {% endfor %}
+  hello: data
