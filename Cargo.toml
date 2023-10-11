@@ -27,5 +27,5 @@ env_logger = "0.10"
 
 
 [profile.release]
-opt-level = "z" # 최대 크기 최적화
-lto = true      # 링크 시간 최적화
+opt-level = "z"
+lto = true
