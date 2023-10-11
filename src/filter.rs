@@ -5,9 +5,38 @@ use tera::{Error, Result, Tera, Value as TeraValue};
 
 pub fn register_filters(tera: &mut Tera) {
     info!("register builtin-filters");
+    tera.register_filter("to_object", to_object);
     tera.register_filter("from_json", from_json_filter);
     tera.register_filter("from_yaml", from_yaml_filter);
     tera.register_filter("from_toml", from_toml_filter);
+}
+
+fn to_object(value: &TeraValue, _args: &HashMap<String, TeraValue>) -> Result<TeraValue> {
+    debug!("call to_object");
+    match value {
+        TeraValue::Array(arr) => {
+            if arr.len() % 2 != 0 {
+                return Err(Error::msg(format!(
+                    "The array has {} elements which is odd. It should have an even number of elements for key-value pairing. Example: [key1, val1, key2, val2, ...]",
+                    arr.len()
+                )));
+            }
+
+            let mut map = tera::Map::new();
+            for i in (0..arr.len()).step_by(2) {
+                if let (TeraValue::String(key), val) = (&arr[i], &arr[i + 1]) {
+                    map.insert(key.clone(), val.clone());
+                } else {
+                    return Err(Error::msg("Expected a string key in the array"));
+                }
+            }
+
+            Ok(TeraValue::Object(map))
+        }
+        _ => Err(Error::msg(
+            "Value must be an array to be parsed into an object",
+        )),
+    }
 }
 
 fn from_json_filter(value: &TeraValue, _args: &HashMap<String, TeraValue>) -> Result<TeraValue> {

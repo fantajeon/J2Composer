@@ -1,6 +1,6 @@
 # Jintemplify
 
-`jintemplify` is a CLI(Command Line Interface) tool that enables users to combine Jinja2 templates with YAML variables, producing files in any desired format, including Dockerfiles and Makefiles. Designed for flexibility, `jintemplify` seamlessly integrates with Jenkins, Tekton, and other CI(Continuous Integration) systems in modern DevOps workflows. The application also supports a plugin system based on shell scripts, allowing users to extend its functionality with familiar scripting techniques.
+`jintemplify` is a CLI(Command Line Interface) tool that enables users to combine Jinja2([rust Tera library](https://keats.github.io/tera/)) templates with YAML variables, producing files in any desired format, including Dockerfiles and Makefiles. Designed for flexibility, `jintemplify` seamlessly integrates with Jenkins, Tekton, and other CI(Continuous Integration) systems in modern DevOps workflows. The application also supports a plugin system based on shell scripts, allowing users to extend its functionality with familiar scripting techniques.
 
 ## Features
 
@@ -47,7 +47,13 @@ In this structure:
 
 With `jintemplify`, you're not limited to just basic Jinja2 templating. We've introduced specialized filters and functions to provide more flexibility:
 
+### Functions
+
 - **Reading Files Directly**: With the read_file function, you can directly read the contents of a file into your Jinja2 template. This is especially useful for including large chunks of data or content without manually copying them into the template.
+- **Converting Arrays to Objects**: With the `to_object` filter, you can convert arrays with alternating keys and values (e.g., `[key1, value1, key2, value2]`) into a Jinja2 accessible object (`{key1: value1, key2: value2}`).
+- **Executing Shell Commands**: With the `shell` function, you can directly execute shell commands from within your Jinja2 template. This can be especially useful for dynamic content generation based on command outputs. For example, `shell("echo hello", world="Jinja")` will set the environment variable `world` to "Jinja" before executing the `echo hello` command.
+
+### Filters
 
 - **Reading From Strings**: If you have data embedded within your templates as strings, you can convert them into usable Jinja2 objects with the following filters:
   - `from_read_json`: Parse a JSON string and convert it to a Jinja2 object.
