@@ -15,6 +15,7 @@ use error::panic_hook;
 mod filter;
 mod render;
 use render::{render_template, render_variables};
+mod command;
 mod function;
 
 struct Args {

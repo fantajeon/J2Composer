@@ -1,10 +1,10 @@
 // src/plugin.rs
+use crate::command::execute_shell_command;
 use crate::render::render_template;
 use anyhow::{self, Context as _Context};
 use log::{debug, error, info};
 use serde::Deserialize;
 use std::collections::HashMap;
-use std::process::Command;
 use tera::{Context, Filter, Function, Tera};
 
 #[derive(Debug, Deserialize)]
@@ -32,88 +32,67 @@ pub struct FilterDeclaration {
     pub script: String,
 }
 
+fn replace_placeholder(
+    cmd: &mut String,
+    param: &Param,
+    args: &HashMap<String, tera::Value>,
+) -> tera::Result<()> {
+    if !args.contains_key(&param.name) && param.default.is_none() {
+        return Err(tera::Error::msg(format!(
+            "Parameter '{}' not provided and no default value is set.",
+            param.name
+        )));
+    }
+    let placeholder = format!("$({})", param.name);
+    let value_str = args
+        .get(&param.name)
+        .map(|v| v.to_string())
+        .unwrap_or_else(|| param.default.as_ref().unwrap().clone());
+    *cmd = cmd.replace(&placeholder, &value_str);
+    Ok(())
+}
+
+fn prepare_command(
+    script: &str,
+    params: &Option<Vec<Param>>,
+    args: &HashMap<String, tera::Value>,
+) -> tera::Result<String> {
+    let mut cmd = script.clone().to_string();
+    if let Some(parameters) = params {
+        for param in parameters {
+            replace_placeholder(&mut cmd, param, args)?;
+        }
+    }
+    Ok(cmd)
+}
+
+fn prepare_command_filter(
+    script: &str,
+    params: &Option<Vec<Param>>,
+    value: &tera::Value,
+    args: &HashMap<String, tera::Value>,
+) -> tera::Result<String> {
+    let mut cmd = script.clone().to_string();
+    if let Some(parameters) = params {
+        for param in parameters {
+            // input은 value로 직접 처리되므로 이를 건너뛰기
+            if param.name != "input" {
+                replace_placeholder(&mut cmd, param, args)?;
+            } else {
+                cmd = cmd.replace("$(input)", &value.to_string());
+            }
+        }
+    }
+    Ok(cmd)
+}
+
 impl Function for FunctionDeclartion {
     fn call(&self, args: &HashMap<String, tera::Value>) -> tera::Result<tera::Value> {
         debug!("function call: {}, params={:?}", self.name, args);
-        let mut cmd = self.script.clone();
-
-        if let Some(params) = &self.params {
-            for param in params {
-                if !args.contains_key(&param.name) && param.default.is_none() {
-                    error!(
-                        "function call: {}, not provided param={}",
-                        self.name, param.name
-                    );
-                    return Err(tera::Error::msg(format!(
-                        "Parameter '{}' not provided for function '{}' and no default value is set.",
-                        param.name, self.name
-                    )));
-                }
-
-                let placeholder = format!("$({})", param.name);
-                let value_str = match args.get(&param.name) {
-                    Some(tera::Value::String(s)) => s.clone(),
-                    Some(v) => v.to_string(),
-                    None => param.default.as_ref().unwrap().clone(),
-                };
-                cmd = cmd.replace(&placeholder, &value_str);
-            }
-        }
-
-        debug!("shell command: {}, env: {:?}", cmd, self.env);
-        let mut shell_cmd = run_with_shebang(&cmd, self.env.as_ref())
-            .map_err(|e| tera::Error::msg(format!("Failed to execute command '{}': {}", cmd, e)))?;
-
-        let output = shell_cmd.output();
-
-        match &output {
-            Ok(o) if o.status.success() => {
-                info!("Command executed successfully: {} => {:?}", cmd, o);
-                let output_str = String::from_utf8_lossy(&o.stdout);
-                debug!("{} => output_str: {}", self.name, output_str.to_string());
-                Ok(tera::Value::String(output_str.to_string()))
-            }
-            Ok(o) => {
-                error!("Command failed: {} => {:?}", cmd, o);
-                Err(tera::Error::msg(format!(
-                    "Failed to execute command '{}': {}",
-                    cmd,
-                    String::from_utf8_lossy(&o.stderr)
-                )))
-            }
-            Err(e) => {
-                error!("Error executing command: {}", e);
-                Err(tera::Error::msg(format!(
-                    "Failed to execute command '{}': {}",
-                    cmd, e
-                )))
-            }
-        }
+        let cmd = prepare_command(&self.script, &self.params, args)?;
+        let result = execute_shell_command(&cmd, &self.env, None)?;
+        Ok(tera::Value::String(result))
     }
-}
-
-fn run_with_shebang(
-    cmd: &str,
-    env_vars: Option<&HashMap<String, String>>,
-) -> Result<Command, std::io::Error> {
-    let lines: Vec<&str> = cmd.split('\n').collect();
-    let interpreter = if lines[0].starts_with("#!") {
-        &lines[0][2..]
-    } else {
-        "sh"
-    };
-
-    let mut command = Command::new(interpreter);
-    command.arg("-c").arg(cmd);
-
-    if let Some(envs) = env_vars {
-        for (key, value) in envs.iter() {
-            command.env(key, value);
-        }
-    }
-
-    command.spawn()?.wait()?;
-    Ok(command)
 }
 
 impl Filter for FilterDeclaration {
@@ -126,59 +105,9 @@ impl Filter for FilterDeclaration {
             "filter call: {}, params={:?}, value={:?}",
             self.name, args, value
         );
-        let mut cmd = self.script.clone();
-
-        if let Some(params) = &self.params {
-            let default_value = tera::Value::String("".to_string());
-            for param in params {
-                // input은 value로 직접 처리되므로 이를 건너뛰기
-                if param.name == "input" {
-                    continue;
-                }
-
-                let arg_value = args.get(&param.name).unwrap_or_else(|| &default_value);
-
-                let value_str = match arg_value {
-                    tera::Value::String(s) => s.clone(),
-                    v => v.to_string(),
-                };
-
-                let placeholder = format!("$({})", param.name);
-                cmd = cmd.replace(&placeholder, &value_str);
-            }
-            let input_str = value.to_string();
-            cmd = cmd.replace("$(input)", &input_str);
-        }
-
-        debug!("shell command: {}, env: {:?}", cmd, self.env);
-        let mut shell_cmd = run_with_shebang(&cmd, self.env.as_ref())
-            .map_err(|e| tera::Error::msg(format!("Failed to execute command '{}': {}", cmd, e)))?;
-
-        let output = shell_cmd.output();
-
-        match &output {
-            Ok(o) if o.status.success() => {
-                info!("Command executed successfully: {} => {:?}", cmd, o);
-                let output_str = String::from_utf8_lossy(&o.stdout);
-                debug!("{} => output_str: {}", self.name, output_str.to_string());
-                Ok(tera::Value::String(output_str.to_string()))
-            }
-            Ok(o) => {
-                error!("Command failed: {} => {:?}", cmd, o);
-                Err(tera::Error::msg(format!(
-                    "Failed to execute command '{}': {}",
-                    cmd,
-                    String::from_utf8_lossy(&o.stderr)
-                )))
-            }
-            Err(e) => {
-                error!("Error executing command: {}", e);
-                Err(tera::Error::msg(format!(
-                    "Failed to execute command '{}': {}",
-                    cmd, e
-                )))
-            }
-        }
+        let cmd = prepare_command_filter(&self.script, &self.params, value, args)?;
+        let result = execute_shell_command(&cmd, &self.env, None)?;
+        Ok(tera::Value::String(result))
     }
 }
 
