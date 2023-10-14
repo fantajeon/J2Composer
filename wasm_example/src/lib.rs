@@ -32,8 +32,8 @@ pub fn combine_strings(input: Input) -> Output {
 #[plugin_macro::plugin_filter]
 pub fn myindent(value: String, input: Input) -> Output {
     // Deserialize the input
-    let combined_result = format!("{} => {}{}", value, input.var1, input.var2);
-    send_log(&format!("{}", "Hello from Wasm!"));
+    let combined_result = format!("filter: {} => {}{}", value, input.var1, input.var2);
+    send_log(&format!("filter: {}", "Hello from Wasm!"));
     // Serialize the output
     Output {
         result: combined_result,

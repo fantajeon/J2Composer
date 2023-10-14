@@ -101,7 +101,7 @@ pub fn execute_wasm_function(
     let arg = config.filter_params(arg);
 
     let input_data = serde_json::json!(InputParam {
-        params: vec![serde_json::json!(arg)]
+        params: vec![serde_json::json!("value start"), serde_json::json!(arg)]
     });
     let input_bytes = input_data.to_string().into_bytes();
 
