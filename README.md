@@ -113,13 +113,13 @@ cargo instll jintemplify
 
 1. Clone the repository:
 
-```
+```bash
 git clone https://github.com/your_username/jintemplify.git
 ```
 
 2. Navigate to the project directory and build using Cargo:
 
-```
+```bash
 cd jintemplify
 cargo build --release
 ```

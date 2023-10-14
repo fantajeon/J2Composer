@@ -8,6 +8,7 @@ use std::env;
 use std::fs;
 use std::path::Path;
 use tera::{Context, Tera};
+mod ast;
 mod plugin;
 use plugin::Plugin;
 mod error;
@@ -17,6 +18,8 @@ mod render;
 use render::{render_template, render_variables};
 mod command;
 mod function;
+mod wasm_plugin;
+mod shell_plugin;
 
 struct Args {
     envs: HashMap<String, String>,
@@ -228,8 +231,9 @@ fn main() -> anyhow::Result<()> {
         if let Some(functions) = plugins.functions {
             for func_decl in functions.into_iter() {
                 // Register Function Plugins
-                let name = func_decl.name.clone();
-                tera.register_function(&name, func_decl);
+                let name = &func_decl.name;
+                let func = func_decl.create()?;
+                tera.register_function(&name, func);
                 info!("register_function: {}", name);
             }
         }
@@ -237,8 +241,9 @@ fn main() -> anyhow::Result<()> {
         if let Some(filters) = plugins.filters {
             for filter_decl in filters.into_iter() {
                 // Register Filter Plugins
-                let name = filter_decl.name.clone();
-                tera.register_filter(&name, filter_decl);
+                let name = &filter_decl.name;
+                let filter = filter_decl.create()?;
+                tera.register_filter(&name, filter);
                 info!("register_filter: {}", name);
             }
         }
