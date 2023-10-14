@@ -21,6 +21,12 @@ macro_rules! host_plugin {
 }
 
 #[allow(dead_code)]
+#[derive(serde::Deserialize, serde::Serialize)]
+pub struct InputWrapper {
+    pub params: Vec<serde_json::Value>,
+}
+
+#[allow(dead_code)]
 #[repr(C)]
 pub struct ReturnValues {
     pub ptr: u32,
