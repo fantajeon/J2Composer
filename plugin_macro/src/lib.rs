@@ -77,11 +77,8 @@ pub fn plugin_function(_attr: TokenStream, item: TokenStream) -> TokenStream {
 
         #[no_mangle]
         pub unsafe extern "C" fn #fn_name(ptr: *mut u8, len: i32) -> *mut plugin::ReturnValues {
-
             #(#prelude)*
-
             let out = (move || #output_type #fn_block)();
-
             #epilode
         }
     };
