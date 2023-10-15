@@ -31,7 +31,7 @@ fn translate_inputs<'a>(it: impl Iterator<Item = &'a mut FnArg>) -> Vec<Stmt> {
     it.enumerate()
         .map(|(i, arg)| {
             let FnArg::Typed(arg) = arg else {
-                panic!("self is not allowed in guest functions")
+                panic!("self is not allowed for plugin functions")
             };
             let Pat::Ident(id) = &*arg.pat else {
                 panic!("Invalid function declation")
