@@ -62,8 +62,7 @@ fn translate_output(ret: &mut ReturnType) -> Stmt {
     out
 }
 
-#[proc_macro_attribute]
-pub fn plugin_function(_attr: TokenStream, item: TokenStream) -> TokenStream {
+fn make_plugin(_attr: TokenStream, item: TokenStream) -> TokenStream {
     let mut item_fn = parse_macro_input!(item as ItemFn);
 
     let prelude = translate_inputs(item_fn.sig.inputs.iter_mut());
@@ -74,9 +73,8 @@ pub fn plugin_function(_attr: TokenStream, item: TokenStream) -> TokenStream {
     let output_type = item_fn.sig.output.clone();
 
     let expanded = quote! {
-
         #[no_mangle]
-        pub unsafe extern "C" fn #fn_name(ptr: *mut u8, len: i32) -> *mut plugin::ReturnValues {
+        pub unsafe extern "C" fn #fn_name (ptr: *mut u8, len: i32) -> *mut plugin::ReturnValues {
             #(#prelude)*
             let out = (move || #output_type #fn_block)();
             #epilode
@@ -87,22 +85,11 @@ pub fn plugin_function(_attr: TokenStream, item: TokenStream) -> TokenStream {
 }
 
 #[proc_macro_attribute]
-pub fn plugin_filter(_attr: TokenStream, item: TokenStream) -> TokenStream {
-    let mut item_fn = parse_macro_input!(item as ItemFn);
-    let prelude = translate_inputs(item_fn.sig.inputs.iter_mut());
-    let epilode = translate_output(&mut item_fn.sig.output);
-    let fn_name = &item_fn.sig.ident;
-    let fn_block = item_fn.block;
-    let output_type = item_fn.sig.output.clone();
+pub fn plugin_filter(attr: TokenStream, item: TokenStream) -> TokenStream {
+    make_plugin(attr, item)
+}
 
-    let expanded = quote! {
-        #[no_mangle]
-        pub unsafe extern "C" fn #fn_name(ptr: *mut u8, len: i32) -> *mut plugin::ReturnValues {
-            #(#prelude)*
-            let out = (move || #output_type #fn_block)();
-            #epilode
-        }
-    };
-
-    expanded.into()
+#[proc_macro_attribute]
+pub fn plugin_function(attr: TokenStream, item: TokenStream) -> TokenStream {
+    make_plugin(attr, item)
 }
