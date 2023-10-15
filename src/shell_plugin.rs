@@ -1,7 +1,6 @@
-
+use crate::ast::{Executable, Param};
+use crate::command::{execute_shell_command, replace_placeholder};
 use std::collections::HashMap;
-use crate::ast::{Executable,Param};
-use crate::command::{replace_placeholder,execute_shell_command};
 
 pub struct ShellCommand {
     pub script: String,
@@ -10,11 +9,11 @@ pub struct ShellCommand {
 }
 
 pub struct ShellFunction {
-    pub command: ShellCommand
+    pub command: ShellCommand,
 }
 
 pub struct ShellFilter {
-    pub command: ShellCommand
+    pub command: ShellCommand,
 }
 
 fn prepare_command(
@@ -32,9 +31,17 @@ fn prepare_command(
 }
 
 impl Executable for ShellFunction {
-    fn execute(&self, args: &HashMap<String, tera::Value>, _value: Option<&tera::Value>) -> tera::Result<String> {
+    fn execute(
+        &self,
+        args: &HashMap<String, tera::Value>,
+        _value: Option<&tera::Value>,
+    ) -> tera::Result<tera::Value> {
         let cmd = prepare_command(&self.command.script, &self.command.params, args)?;
-        execute_shell_command(&cmd, &self.command.env, None)
+        Ok(tera::Value::String(execute_shell_command(
+            &cmd,
+            &self.command.env,
+            None,
+        )?))
     }
 }
 
@@ -59,8 +66,21 @@ pub fn prepare_command_filter(
 }
 
 impl Executable for ShellFilter {
-    fn execute(&self, args: &HashMap<String, tera::Value>, value: Option<&tera::Value>) -> tera::Result<String> {
-        let cmd = prepare_command_filter(&self.command.script, &self.command.params, value.unwrap(), args)?;
-        execute_shell_command(&cmd, &self.command.env, None)
+    fn execute(
+        &self,
+        args: &HashMap<String, tera::Value>,
+        value: Option<&tera::Value>,
+    ) -> tera::Result<tera::Value> {
+        let cmd = prepare_command_filter(
+            &self.command.script,
+            &self.command.params,
+            value.unwrap(),
+            args,
+        )?;
+        Ok(tera::Value::String(execute_shell_command(
+            &cmd,
+            &self.command.env,
+            None,
+        )?))
     }
 }

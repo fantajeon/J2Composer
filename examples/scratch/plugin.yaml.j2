@@ -19,3 +19,10 @@ filters:
     script: |
       #!/bin/bash
       echo -e $(input) | sed 's/^/$(prefix)/'
+  - name: my_test_filter
+    params:
+      - name: var1
+      - name: var2
+    wasm:
+      path: /Users/hjj/git/jintemplify/wasm_example/target/wasm32-unknown-unknown/release/wasm_example.wasm
+      import: my_test_filter

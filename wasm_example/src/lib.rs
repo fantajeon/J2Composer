@@ -9,34 +9,20 @@ pub struct Input {
     pub var2: String,
 }
 
-#[allow(dead_code)]
-#[derive(Serialize)]
-pub struct Output {
-    pub result: String,
-    pub exception: Option<String>,
-}
-
 #[plugin_macro::plugin_function]
-pub fn combine_strings(input: Input) -> Output {
+pub fn combine_strings(input: Input) -> String {
     // Deserialize the input
     let combined_result = format!("{}{}", input.var1, input.var2);
 
     send_log(&format!("{}", "Hello from Wasm!"));
-    // Serialize the output
-    Output {
-        result: combined_result,
-        exception: None,
-    }
+    combined_result
 }
 
 #[plugin_macro::plugin_filter]
-pub fn myindent(value: String, input: Input) -> Output {
+pub fn my_test_filter(value: String, input: Input) -> String {
     // Deserialize the input
     let combined_result = format!("filter: {} => {}{}", value, input.var1, input.var2);
     send_log(&format!("filter: {}", "Hello from Wasm!"));
     // Serialize the output
-    Output {
-        result: combined_result,
-        exception: None,
-    }
+    combined_result
 }

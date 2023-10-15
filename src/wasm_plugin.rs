@@ -33,8 +33,8 @@ impl Executable for WasmFunction {
         &self,
         args: &HashMap<String, tera::Value>,
         _value: Option<&tera::Value>,
-    ) -> tera::Result<String> {
-        execute_wasm(&self.decl, args, None).map_err(|e| tera::Error::msg(e.to_string()))
+    ) -> tera::Result<tera::Value> {
+        Ok(execute_wasm(&self.decl, args, None).map_err(|e| tera::Error::msg(e.to_string()))?)
     }
 }
 
@@ -63,7 +63,7 @@ fn execute_wasm(
     func_decl: &WasmDeclartion,
     arg: &HashMap<String, tera::Value>,
     value: Option<&tera::Value>,
-) -> anyhow::Result<String> {
+) -> anyhow::Result<tera::Value> {
     let mut store: Store<()> = Store::default();
     let print_func = wasmtime::Func::wrap(
         &mut store,
@@ -150,7 +150,13 @@ fn execute_wasm(
         std::str::from_utf8(result_bytes)?
     };
 
-    Ok(result_str.to_string())
+    let output: plugin::OutputWrapper = match serde_json::from_str(result_str) {
+        Ok(val) => val,
+        Err(err) => return Err(anyhow::anyhow!(err)),
+    };
+
+    println!("plugin::OutputWrapper :{:?}", output);
+    Ok(output.result)
 }
 
 impl Executable for WasmFilter {
@@ -158,7 +164,7 @@ impl Executable for WasmFilter {
         &self,
         args: &HashMap<String, tera::Value>,
         value: Option<&tera::Value>,
-    ) -> tera::Result<String> {
-        execute_wasm(&self.decl, args, value).map_err(|e| tera::Error::msg(e.to_string()))
+    ) -> tera::Result<tera::Value> {
+        Ok(execute_wasm(&self.decl, args, value).map_err(|e| tera::Error::msg(e.to_string()))?)
     }
 }

@@ -27,6 +27,12 @@ pub struct InputWrapper {
 }
 
 #[allow(dead_code)]
+#[derive(serde::Deserialize, serde::Serialize, Debug)]
+pub struct OutputWrapper {
+    pub result: serde_json::Value,
+}
+
+#[allow(dead_code)]
 #[repr(C)]
 pub struct ReturnValues {
     pub ptr: u32,

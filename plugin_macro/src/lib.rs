@@ -87,6 +87,9 @@ pub fn plugin_filter(_attr: TokenStream, item: TokenStream) -> TokenStream {
             #(#prelude)*
 
             let out = (move || #output_type #fn_block)();
+            let out = plugin::OutputWrapper{
+                result: serde_json::json!(out),
+            };
 
             return plugin::serialize_to_return_values(&out);
         }
