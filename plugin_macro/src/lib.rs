@@ -1,11 +1,32 @@
 extern crate proc_macro;
 
 use proc_macro::TokenStream;
-use quote::{format_ident, quote};
-use syn::{parse_macro_input, parse_quote, FnArg, ItemFn, Pat, Stmt};
+use quote::quote;
+use syn::{parse_macro_input, parse_quote, FnArg, ItemFn, Pat, ReturnType, Stmt};
 
 fn translate_inputs<'a>(it: impl Iterator<Item = &'a mut FnArg>) -> Vec<Stmt> {
-    let mut out: Vec<Stmt> = vec![];
+    let preprocess_block: Stmt = parse_quote!(let args: plugin::InputWrapper = {
+        let slice = unsafe { std::slice::from_raw_parts(ptr, len as usize) };
+        let json_str = match std::str::from_utf8(slice) {
+            Ok(s) => s,
+            Err(_) => {
+                return plugin::serialize_to_return_values(&plugin::ErrorValue {
+                    reason: "Failed to convert byte slice to string".to_string(),
+                })
+            }
+        };
+        let args = match serde_json::from_str(json_str) {
+            Ok(val) => val,
+            Err(err) => {
+                return plugin::serialize_to_return_values(&plugin::ErrorValue {
+                    reason: format!("Failed to deserialize JSON: {}", err).to_string(),
+                })
+            }
+        };
+        args
+    };);
+
+    let mut out: Vec<Stmt> = vec![preprocess_block];
 
     it.enumerate()
         .map(|(i, arg)| {
@@ -26,11 +47,27 @@ fn translate_inputs<'a>(it: impl Iterator<Item = &'a mut FnArg>) -> Vec<Stmt> {
     out
 }
 
+fn translate_output(ret: &mut ReturnType) -> Stmt {
+    let mut out = parse_quote!(return out;);
+
+    if let ReturnType::Type(_, _ty) = ret {
+        out = parse_quote!({
+            let out = plugin::OutputWrapper {
+                result: serde_json::json!(out),
+            };
+            return plugin::serialize_to_return_values(&out);
+        });
+    }
+
+    out
+}
+
 #[proc_macro_attribute]
 pub fn plugin_function(_attr: TokenStream, item: TokenStream) -> TokenStream {
     let mut item_fn = parse_macro_input!(item as ItemFn);
 
     let prelude = translate_inputs(item_fn.sig.inputs.iter_mut());
+    let epilode = translate_output(&mut item_fn.sig.output);
 
     let fn_name = &item_fn.sig.ident;
     let fn_block = &item_fn.block;
@@ -40,32 +77,23 @@ pub fn plugin_function(_attr: TokenStream, item: TokenStream) -> TokenStream {
 
         #[no_mangle]
         pub unsafe extern "C" fn #fn_name(ptr: *mut u8, len: i32) -> *mut plugin::ReturnValues {
-            let slice = unsafe { std::slice::from_raw_parts(ptr, len as usize) };
-            let json_str = match std::str::from_utf8(slice) {
-                Ok(s) => s,
-                Err(_) => return plugin::serialize_to_return_values(&plugin::ErrorValue{reason:"Failed to convert byte slice to string".to_string()}),
-            };
-
-            let args: plugin::InputWrapper = match serde_json::from_str(json_str) {
-                Ok(val) => val,
-                Err(err) => return plugin::serialize_to_return_values(&plugin::ErrorValue{reason: format!("Failed to deserialize JSON: {}", err).to_string()}),
-            };
 
             #(#prelude)*
 
-            let output = (move || #output_type #fn_block)();
+            let out = (move || #output_type #fn_block)();
 
-            plugin::serialize_to_return_values(&output)
+            #epilode
         }
     };
 
-    TokenStream::from(expanded)
+    expanded.into()
 }
 
 #[proc_macro_attribute]
 pub fn plugin_filter(_attr: TokenStream, item: TokenStream) -> TokenStream {
     let mut item_fn = parse_macro_input!(item as ItemFn);
     let prelude = translate_inputs(item_fn.sig.inputs.iter_mut());
+    let epilode = translate_output(&mut item_fn.sig.output);
     let fn_name = &item_fn.sig.ident;
     let fn_block = item_fn.block;
     let output_type = item_fn.sig.output.clone();
@@ -73,27 +101,11 @@ pub fn plugin_filter(_attr: TokenStream, item: TokenStream) -> TokenStream {
     let expanded = quote! {
         #[no_mangle]
         pub unsafe extern "C" fn #fn_name(ptr: *mut u8, len: i32) -> *mut plugin::ReturnValues {
-            let slice = unsafe { std::slice::from_raw_parts(ptr, len as usize) };
-            let json_str = match std::str::from_utf8(slice) {
-                Ok(s) => s,
-                Err(_) => return plugin::serialize_to_return_values(&plugin::ErrorValue{reason:"Failed to convert byte slice to string".to_string()}),
-            };
-
-            let args: plugin::InputWrapper = match serde_json::from_str(json_str) {
-                Ok(val) => val,
-                Err(err) => return plugin::serialize_to_return_values(&plugin::ErrorValue{reason: format!("Failed to deserialize JSON: {}", err).to_string()}),
-            };
-
             #(#prelude)*
-
             let out = (move || #output_type #fn_block)();
-            let out = plugin::OutputWrapper{
-                result: serde_json::json!(out),
-            };
-
-            return plugin::serialize_to_return_values(&out);
+            #epilode
         }
     };
 
-    TokenStream::from(expanded)
+    expanded.into()
 }
