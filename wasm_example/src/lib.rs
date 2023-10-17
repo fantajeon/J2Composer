@@ -10,9 +10,9 @@ pub struct Input {
 }
 
 #[plugin_macro::plugin_filter]
-pub fn my_test_filter(value: String, input: Input) -> String {
+pub fn my_test_filter(input: String, input2: Input) -> String {
     // Deserialize the input
-    let combined_result = format!("filter: {} => {}{}", value, input.var1, input.var2);
+    let combined_result = format!("filter: {} => {}{}", input, input2.var1, input2.var2);
     send_log(&format!("filter: {}", "Hello from Wasm!"));
     // Serialize the output
     combined_result

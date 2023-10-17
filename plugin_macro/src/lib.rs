@@ -5,26 +5,28 @@ use quote::quote;
 use syn::{parse_macro_input, parse_quote, FnArg, ItemFn, Pat, ReturnType, Stmt};
 
 fn translate_inputs<'a>(it: impl Iterator<Item = &'a mut FnArg>) -> Vec<Stmt> {
-    let preprocess_block: Stmt = parse_quote!(let args: plugin::InputWrapper = {
-        let slice = unsafe { std::slice::from_raw_parts(ptr, len as usize) };
-        let json_str = match std::str::from_utf8(slice) {
-            Ok(s) => s,
-            Err(_) => {
-                return plugin::serialize_to_return_values(&plugin::ErrorValue {
-                    reason: "Failed to convert byte slice to string".to_string(),
-                })
-            }
+    let preprocess_block: Stmt = parse_quote! {
+        let args: plugin::InputWrapper = {
+            let slice = unsafe { std::slice::from_raw_parts(ptr, len as usize) };
+            let json_str = match std::str::from_utf8(slice) {
+                Ok(s) => s,
+                Err(_) => {
+                    return plugin::serialize_to_return_values(&plugin::ErrorValue {
+                        reason: "Failed to convert byte slice to string".to_string(),
+                    })
+                }
+            };
+            let args = match serde_json::from_str(json_str) {
+                Ok(val) => val,
+                Err(err) => {
+                    return plugin::serialize_to_return_values(&plugin::ErrorValue {
+                        reason: format!("Failed to deserialize JSON: {}", err).to_string(),
+                    })
+                }
+            };
+            args
         };
-        let args = match serde_json::from_str(json_str) {
-            Ok(val) => val,
-            Err(err) => {
-                return plugin::serialize_to_return_values(&plugin::ErrorValue {
-                    reason: format!("Failed to deserialize JSON: {}", err).to_string(),
-                })
-            }
-        };
-        args
-    };);
+    };
 
     let mut out: Vec<Stmt> = vec![preprocess_block];
 
