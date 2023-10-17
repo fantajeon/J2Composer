@@ -18,8 +18,8 @@ mod render;
 use render::{render_template, render_variables};
 mod command;
 mod function;
-mod wasm_plugin;
 mod shell_plugin;
+mod wasm_plugin;
 
 struct Args {
     envs: HashMap<String, String>,

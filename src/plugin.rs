@@ -52,7 +52,7 @@ pub struct ExecutableFunction {
 
 impl Function for ExecutableFunction {
     fn call(&self, args: &HashMap<String, tera::Value>) -> tera::Result<tera::Value> {
-        println!("function call: {}, params={:?}", self.name, args);
+        debug!("function call: {}, params={:?}", self.name, args);
         let result = self.executor.execute(args, None)?;
         Ok(result)
     }
@@ -109,7 +109,7 @@ impl Filter for ExecutableFilter {
         value: &tera::Value,
         args: &HashMap<String, tera::Value>,
     ) -> tera::Result<tera::Value> {
-        println!(
+        debug!(
             "filter call: {}, params={:?}, value={:?}",
             self.name, args, value
         );

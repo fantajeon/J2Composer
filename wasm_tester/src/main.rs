@@ -1,5 +1,6 @@
 // tester.rs
 use anyhow::{self};
+use log::debug;
 use plugin::ReturnValues;
 use serde::{Deserialize, Serialize};
 use serde_json;
@@ -90,7 +91,7 @@ pub fn execute_wasm_function(
                 None => anyhow::bail!("pointer/length out of bounds"),
             };
 
-            println!("{}", string);
+            debug!("{}", string);
             Ok(())
         },
     );

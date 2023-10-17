@@ -1,4 +1,5 @@
 use crate::ast::{Executable, Param};
+use log::{debug, info};
 use plugin;
 use serde::Deserialize;
 use std::collections::HashMap;
@@ -105,7 +106,7 @@ fn get_imports<T>(store: &mut Store<T>) -> Vec<Extern> {
                 None => Err(anyhow::anyhow!("invalid utf-8")),
             }?;
 
-            println!("{}", string);
+            info!("{}", string);
             Ok(())
         },
     );
@@ -162,7 +163,7 @@ impl<'a> WasmExecutor<'a> {
 
         let mut results = vec![Val::I32(0)];
 
-        println!("run funciton.call");
+        debug!("run funciton.call");
         function.call(
             &mut self.store,
             &[
@@ -182,7 +183,7 @@ impl<'a> WasmExecutor<'a> {
         let return_values: &plugin::ReturnValues =
             unsafe { &*(memory_slice.as_ptr() as *const plugin::ReturnValues) };
 
-        println!(
+        debug!(
             "return_values={}, len={}",
             return_values.ptr, return_values.len
         );
@@ -201,7 +202,7 @@ impl<'a> WasmExecutor<'a> {
             Err(err) => return Err(anyhow::anyhow!(err)),
         };
 
-        println!("plugin::OutputWrapper :{:?}", output);
+        debug!("plugin::OutputWrapper :{:?}", output);
         Ok(output.result)
     }
 }
@@ -233,7 +234,7 @@ fn execute_wasm(
                 None => anyhow::bail!("pointer/length out of bounds"),
             };
 
-            println!("{}", string);
+            debug!("{}", string);
             Ok(())
         },
     );
@@ -263,7 +264,7 @@ fn execute_wasm(
 
     let mut results = vec![Val::I32(0)];
 
-    println!("run funciton.call");
+    debug!("run funciton.call");
     function.call(
         &mut store,
         &[
@@ -302,7 +303,7 @@ fn execute_wasm(
         Err(err) => return Err(anyhow::anyhow!(err)),
     };
 
-    println!("plugin::OutputWrapper :{:?}", output);
+    debug!("plugin::OutputWrapper :{:?}", output);
     Ok(output.result)
 }
 

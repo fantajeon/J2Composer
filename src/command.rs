@@ -30,7 +30,7 @@ pub fn replace_placeholder(
     let value = args.get(&param.name).unwrap();
 
     let value_str = tera_to_str(value)?;
-    println!("placeholder: {} => {}", placeholder, value_str);
+    debug!("placeholder: {} => {}", placeholder, value_str);
     *cmd = cmd.replace(&placeholder, &value_str);
     Ok(())
 }
@@ -40,7 +40,7 @@ pub fn execute_shell_command(
     env: &Option<HashMap<String, String>>,
     interpreter: Option<&str>,
 ) -> tera::Result<String> {
-    println!(
+    debug!(
         "interpreter: {:?}, shell command: {}, env: {:?}",
         interpreter, cmd, env
     );
@@ -77,7 +77,7 @@ fn run_with_shebang(
 ) -> Result<Command, std::io::Error> {
     let (interpreter, actual_cmd) = extract_interpreter(cmd);
     let mut command = run_with_interpreter(&interpreter, &actual_cmd, env_vars)?;
-    println!("run with shebang: {}, cmd={}", interpreter, actual_cmd);
+    debug!("run with shebang: {}, cmd={}", interpreter, actual_cmd);
 
     command.spawn()?.wait()?;
     Ok(command)
