@@ -1,10 +1,25 @@
+extern crate alloc;
+
 use serde::Serialize;
 
 #[macro_export]
 macro_rules! guest_plugin {
     () => {
+        #[no_mangle]
         extern "C" {
             fn print_log_from_wasm(ptr: *const u8, len: usize);
+        }
+
+        #[no_mangle]
+        extern "C" fn guest_free(ptr: *mut plugin::ReturnValues) {
+            free_return_values(ptr);
+        }
+
+        pub fn free_return_values(ptr: *mut plugin::ReturnValues) {
+            let boxed = unsafe { Box::from_raw(ptr) };
+            let _ = unsafe {
+                Vec::from_raw_parts(boxed.ptr as *mut u8, boxed.len as usize, boxed.len as usize)
+            };
         }
 
         pub fn send_log(message: &str) {

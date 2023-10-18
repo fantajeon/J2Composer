@@ -50,7 +50,7 @@ fn translate_inputs<'a>(it: impl Iterator<Item = &'a mut FnArg>) -> Vec<Stmt> {
 }
 
 fn translate_output(ret: &mut ReturnType) -> Stmt {
-    let mut out = parse_quote!(return out;);
+    let mut out = parse_quote!(return (out.ptr, out.len););
 
     if let ReturnType::Type(_, _ty) = ret {
         out = parse_quote!({
@@ -76,7 +76,7 @@ fn make_plugin(_attr: TokenStream, item: TokenStream) -> TokenStream {
 
     let expanded = quote! {
         #[no_mangle]
-        pub unsafe extern "C" fn #fn_name (ptr: *mut u8, len: i32) -> *mut plugin::ReturnValues {
+        pub unsafe extern "C" fn #fn_name (ptr: *mut u8, len: u32) -> *mut plugin::ReturnValues {
             #(#prelude)*
             let out = (move || #output_type #fn_block)();
             #epilode

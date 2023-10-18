@@ -127,6 +127,15 @@ impl<'a> WasmExecutor<'a> {
         })
     }
 
+    fn free_return_values(&mut self, ptr: u32) {
+        let guest_free = self
+            .instance
+            .get_typed_func::<u32, ()>(&mut self.store, "guest_free")
+            .unwrap();
+
+        guest_free.call(&mut self.store, ptr as u32).unwrap();
+    }
+
     fn prepare_input_data(
         &self,
         arg: &HashMap<String, tera::Value>,
@@ -158,37 +167,35 @@ impl<'a> WasmExecutor<'a> {
 
         let function = self
             .instance
-            .get_func(&mut self.store, &self.func_decl.wasm.import)
-            .ok_or_else(|| anyhow::anyhow!("Failed to find function: combine_strings"))?;
+            .get_typed_func::<(u32, u32), u32>(&mut self.store, &self.func_decl.wasm.import)?;
+        //.get_func(&mut self.store, &self.func_decl.wasm.import)
 
-        let mut results = vec![Val::I32(0)];
-
-        debug!("run funciton.call");
-        function.call(
+        //println!("run funciton.call");
+        let ptr = function.call(
             &mut self.store,
-            &[
-                Val::I32(input_ptr as i32),
-                Val::I32(input_bytes.len() as i32),
-            ],
-            &mut results,
+            (input_ptr as u32, input_bytes.len() as u32),
         )?;
 
-        let result_ptr = results[0].unwrap_i32() as usize;
+        let result_ptr = ptr as usize;
         let result_len = std::mem::size_of::<plugin::ReturnValues>();
 
         let memory_slice = unsafe {
-            std::slice::from_raw_parts(memory.data(&self.store)[result_ptr..].as_ptr(), result_len)
+            std::slice::from_raw_parts_mut(
+                memory.data_mut(&mut self.store)[result_ptr..].as_mut_ptr(),
+                result_len,
+            )
         };
 
-        let return_values: &plugin::ReturnValues =
-            unsafe { &*(memory_slice.as_ptr() as *const plugin::ReturnValues) };
+        let return_values: &mut plugin::ReturnValues =
+            unsafe { &mut *(memory_slice.as_mut_ptr() as *mut plugin::ReturnValues) };
 
         debug!(
             "return_values={}, len={}",
-            return_values.ptr, return_values.len
+            (*return_values).ptr,
+            (*return_values).len
         );
-        let result_ptr = return_values.ptr as usize;
-        let result_len = return_values.len as usize;
+        let result_ptr = (*return_values).ptr as usize;
+        let result_len = (*return_values).len as usize;
 
         // Extract the result string
         let result_str = unsafe {
@@ -196,6 +203,8 @@ impl<'a> WasmExecutor<'a> {
                 slice::from_raw_parts(memory.data(&self.store)[result_ptr..].as_ptr(), result_len);
             std::str::from_utf8(result_bytes)?
         };
+
+        self.free_return_values(ptr);
 
         let output: plugin::OutputWrapper = match serde_json::from_str(result_str) {
             Ok(val) => val,
@@ -275,7 +284,8 @@ fn execute_wasm(
     )?;
 
     let result_ptr = results[0].unwrap_i32() as usize;
-    let result_len = std::mem::size_of::<plugin::ReturnValues>();
+    //let result_len = std::mem::size_of::<plugin::ReturnValues>();
+    let result_len = results[1].unwrap_i32() as usize;
 
     let memory_slice = unsafe {
         std::slice::from_raw_parts(memory.data(&store)[result_ptr..].as_ptr(), result_len)
