@@ -18,7 +18,7 @@ macro_rules! guest_plugin {
         pub fn free_return_values(ptr: *mut plugin::ReturnValues) {
             let boxed = unsafe { Box::from_raw(ptr) };
             let _ = unsafe {
-                Vec::from_raw_parts(boxed.ptr as *mut u8, boxed.len as usize, boxed.len as usize)
+                Vec::from_raw_parts(boxed.ptr as *mut u8, boxed.len as usize, boxed.cap as usize)
             };
         }
 
@@ -52,6 +52,7 @@ pub struct OutputWrapper {
 pub struct ReturnValues {
     pub ptr: u32,
     pub len: u32,
+    pub cap: u32,
 }
 
 #[allow(dead_code)]
@@ -65,11 +66,13 @@ pub fn serialize_to_return_values<T: serde::Serialize>(data: &T) -> *mut ReturnV
     let output_bytes = output_json.into_bytes();
     let output_len = output_bytes.len();
     let output_ptr = output_bytes.as_ptr();
+    let output_cap = output_bytes.capacity();
     std::mem::forget(output_bytes);
 
     let return_values = Box::new(ReturnValues {
         ptr: output_ptr as u32,
         len: output_len as u32,
+        cap: output_cap as u32,
     });
     Box::into_raw(return_values)
 }
