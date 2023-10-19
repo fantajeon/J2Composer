@@ -1,0 +1,16 @@
+function:
+  #- name: combine_strings2
+  #  params:
+  #    - name: var1
+  #    - name: var2
+  #  wasm:
+  #    path: ../wasm_example/target/wasm32-unknown-unknown/release/wasm_example.wasm
+  #    import: combine_strings
+filter:
+  - name: my_test_filter
+    params:
+      - name: var1
+      - name: var2
+    wasm:
+      path: ../wasm_example/target/wasm32-unknown-unknown/release/wasm_example.wasm
+      import: my_test_filter

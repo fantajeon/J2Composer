@@ -1,25 +1,17 @@
 // src/plugin.rs
-use crate::ast::{Executable, Param};
+use crate::ast::{
+    Executable, ExecutableFunction, FilterDeclaration, FunctionDeclaration, WasmDeclartion,
+    WasmFilter, WasmFunction,
+};
 use crate::render::render_template;
 use crate::shell_plugin::{ShellCommand, ShellFilter, ShellFunction};
-use crate::wasm_plugin::{Wasm, WasmDeclartion, WasmFilter, WasmFunction};
 use anyhow::{self, Context as _Context};
 use log::debug;
 use serde::Deserialize;
 use std::collections::HashMap;
 use tera::{Context, Filter, Function, Tera};
 
-#[derive(Debug, Deserialize)]
-pub struct FunctionDeclartion {
-    pub name: String,
-    pub params: Option<Vec<Param>>,
-    pub env: Option<HashMap<String, String>>,
-    pub description: Option<String>,
-    pub wasm: Option<Wasm>,
-    pub script: Option<String>,
-}
-
-impl FunctionDeclartion {
+impl FunctionDeclaration {
     pub fn create(&self) -> anyhow::Result<ExecutableFunction> {
         let executor: Box<dyn Executable> = if let Some(wasm_config) = &self.wasm {
             Box::new(WasmFunction {
@@ -44,28 +36,12 @@ impl FunctionDeclartion {
         })
     }
 }
-
-pub struct ExecutableFunction {
-    executor: Box<dyn Executable>,
-    name: String,
-}
-
 impl Function for ExecutableFunction {
     fn call(&self, args: &HashMap<String, tera::Value>) -> tera::Result<tera::Value> {
         debug!("function call: {}, params={:?}", self.name, args);
         let result = self.executor.execute(args, None)?;
         Ok(result)
     }
-}
-
-#[derive(Debug, Deserialize)]
-pub struct FilterDeclaration {
-    pub name: String,
-    pub params: Option<Vec<Param>>,
-    pub env: Option<HashMap<String, String>>,
-    pub description: Option<String>,
-    pub wasm: Option<Wasm>,
-    pub script: Option<String>,
 }
 
 impl FilterDeclaration {
@@ -120,7 +96,7 @@ impl Filter for ExecutableFilter {
 
 #[derive(Debug, Deserialize)]
 pub struct Plugin {
-    pub functions: Option<Vec<FunctionDeclartion>>,
+    pub functions: Option<Vec<FunctionDeclaration>>,
     pub filters: Option<Vec<FilterDeclaration>>,
 }
 
@@ -142,7 +118,7 @@ mod tests {
 
     #[test]
     fn test_plugin_function_call() {
-        let func_decl = FunctionDeclartion {
+        let func_decl = FunctionDeclaration {
             name: "echo_test".to_string(),
             params: Some(vec![Param {
                 name: "msg".to_string(),
