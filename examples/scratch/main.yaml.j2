@@ -17,5 +17,8 @@ envs:
 ```
 {{- macros::build_list(articles=['article1', 'article2']) | my_indent(prefix="\t") -}}
 
+# test wasm plugin function
+{{ combine_string(var1="hello", var2="world")}}
+
 # test wasm plugin filter
 {{ "hello world" | my_test_filter(var1="hello", var2="world")}}

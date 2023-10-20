@@ -11,6 +11,13 @@ functions:
       my_var: "hello plugin"
     script: echo ${my_var}
 
+  - name: combine_string
+    params:
+      - name: var1
+      - name: var2
+    wasm:
+      path: ./wasm_example/target/wasm32-unknown-unknown/release/wasm_example.wasm
+      import: combine_strings
 filters:
   - name: my_indent
     params:
