@@ -103,7 +103,7 @@ In practice, when you use a filter in Jinja, it works somewhat like this: `value
 
 Remember to keep these data structures lean and only include fields that are essential to your plugin's operation. This ensures flexible data transfer (through `JSON-serialization`) and efficient processing within the Wasm environment.
 
-## 5. Compile and Test
+## 5. Compile
 
 To compile your project to WebAssembly, you'll need to add the `wasm32-unknown-unknown` target architecture:
 
@@ -118,6 +118,48 @@ cargo build --release --target wasm32-unknown-unknown
 ```
 
 Note: After compiling, your WebAssembly output (.wasm file) will be located in the target/wasm32-unknown-unknown/release/ directory.
+
+## 6. Write plugin.yaml.j2 and tester.j2
+
+### plugin.yaml.j2
+
+This configuration file specifies the details and the metadata about your WebAssembly plugin functions and filters:
+
+```yaml
+function:
+    - name: your_function
+    params:
+      - name: var1
+      - name: var2
+    wasm:
+      path: ./wasm_example/target/wasm32-unknown-unknown/release/wasm_example.wasm
+      import: your_function
+filters:
+    - name: your_filter
+        params:
+        - name: var1
+        - name: var2
+        wasm:
+        path: ./wasm_example/target/wasm32-unknown-unknown/release/wasm_example.wasm
+        import: your_filter
+```
+
+### tester.j2
+
+This is a Jinja template to test the functionality of your WebAssembly plugin:
+
+```jinja
+{{your_function(var1="...",var2="...")}}
+{{"value1" | your_filter(var1="...", var2="...")}}
+```
+
+Here:
+
+{{your_function(var1="...",var2="...")}} tests the function plugin by invoking your_function with specified parameters.
+
+{{"value1" | your_filter(var1="...", var2="...")}} tests the filter function plugin, where "value1" is the value that's processed by your filter.
+
+For a more comprehensive understanding, and to see real-world examples, navigate to the examples/scratch directory in the project.
 
 ## Further Reading
 
