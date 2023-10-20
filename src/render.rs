@@ -16,6 +16,7 @@ pub fn render_template(
         .with_context(|| format!("Failed to render template: {}", template_path))
 }
 
+#[allow(dead_code)]
 pub fn render_variables(
     tera: &mut Tera,
     variables_path: Option<&str>,

@@ -69,13 +69,15 @@ jobs:
 
       - name: Build APK package inside Alpine container
         run: |
-          docker run --rm -v $(pwd):/workspace -v $(pwd)/output:/home/builder/packages -w /workspace alpine:latest /bin/ash -c "\
+          docker run --rm -v $(pwd):/workspace -v $(pwd)/output:/home/builder/packages -w /apk_workspace alpine:latest /bin/ash -c "\
             apk add alpine-sdk cargo && \
             adduser -D -G abuild builder && \
-            chown -R builder /workspace && \
             chown -R builder /var/cache/distfiles/ && \
             su builder -c 'abuild-keygen -a -n' && \
             cp /home/builder/.abuild/*.rsa.pub /etc/apk/keys/ && \
+            cp /workspace/APKBUILD . && \
+            chown -R builder /apk_workspace && \
+            chown -R builder /home/builder && \
             su builder -c 'abuild checksum' && \
             su builder -c 'abuild -r'
           "
