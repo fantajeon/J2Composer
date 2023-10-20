@@ -22,7 +22,7 @@ crate-type = ["cdylib"]
 [dependencies]
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1"
-plugin_macro = { git = "https://github.com/fantajeon/jintemplify-plugin", package = "plugin_macro", version = "*" }
+jintemplify_plugin_macro = { git = "https://github.com/fantajeon/jintemplify-plugin", package = "plugin_macro", version = "*" }
 jintemplify_plugin = { git = "https://github.com/fantajeon/jintemplify-plugin", package = "plugin", version = "*" }
 
 ```
@@ -50,7 +50,7 @@ pub struct YourReturnType {
 }
 
 // Define your plugin function.
-#[plugin_macro::plugin_function]
+#[jintemplify_plugin_macro::plugin_function]
 pub fn your_plugin(input: YourInputType) -> YourReturnType {
     // ... your plugin logic here ...
 }
@@ -69,7 +69,7 @@ YourParameterType {
 }
 
 // Define your plugin filter, if required.
-#[plugin_macro::plugin_filter]
+#[jintemplify_plugin_macro::plugin_filter]
 pub fn your_plugin_filter(value: YourValueInputType, input: YourParameterType) -> YourReturnType {
     // ... your filter logic here ...
 }

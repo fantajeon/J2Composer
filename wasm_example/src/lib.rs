@@ -9,7 +9,7 @@ pub struct Input {
     pub var2: String,
 }
 
-#[plugin_macro::plugin_filter]
+#[jintemplify_plugin_macro::plugin_filter]
 pub fn my_test_filter(input: String, input2: Input) -> String {
     // Deserialize the input
     let combined_result = format!("filter: {} => {}{}", input, input2.var1, input2.var2);
@@ -18,7 +18,7 @@ pub fn my_test_filter(input: String, input2: Input) -> String {
     combined_result
 }
 
-#[plugin_macro::plugin_function]
+#[jintemplify_plugin_macro::plugin_function]
 pub fn combine_strings(input: Input) -> String {
     // Deserialize the input
     let combined_result = format!("{}{}", input.var1, input.var2);
