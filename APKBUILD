@@ -9,12 +9,10 @@ depends=""
 makedepends="cargo"
 install=""
 subpackages=""
-builddir="/workspace"
 #source="$pkgname-$pkgver::git+https://github.com/fantajeon/jintemplify.git#tag=v$pkgver"
 
 build() {
-    echo "try build ${builddir}"
-    #cp -a /workspace/* .
+    cp -a /workspace/* .
     cargo build --release
 }
 
