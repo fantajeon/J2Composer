@@ -1,12 +1,12 @@
 # Jintemplify
 
-`jintemplify` is a CLI(Command Line Interface) tool that enables users to combine Jinja2([rust Tera library](https://keats.github.io/tera/)) templates with YAML variables, producing files in any desired format, including Dockerfiles and Makefiles. Designed for flexibility, `jintemplify` seamlessly integrates with Jenkins, Tekton, and other CI(Continuous Integration) systems in modern DevOps workflows. The application also supports a plugin system based on shell scripts, allowing users to extend its functionality with familiar scripting techniques.
+`jintemplify` is a CLI(Command Line Interface) tool that enables users to combine Jinja2([rust Tera library](https://keats.github.io/tera/)) templates with YAML variables, producing files in any desired format, including Dockerfiles and Makefiles. Designed for flexibility, `jintemplify` seamlessly integrates with Jenkins, Tekton, and other CI(Continuous Integration) systems in modern DevOps workflows. The application also supports a plugin system based on shell scripts and Webassembler(WASM) modules, allowing users to extend its functionality with familiar scripting techniques.
 
 ## Features
 
 - **Template Rendering**: Use Jinja2 templates to define the structure of your file.
 - **Variable Support**: Combine your templates with YAML-defined variables.
-- **Plugin System (Shell Script Based)**: Extend the application's functionality with custom shell-script-based plugins. This allows for a wide range of extensibility using familiar scripting methods.
+- **Plugin System (Shell Script Based)**: Extend the application's functionality with custom shell-script-based plugins. This allows for a wide range of extensibility using familiar scripting methods and the performance benefits of Wasm modules.
 
 # Advanced Templating Features
 
@@ -34,14 +34,21 @@ functions:
       CC: clang
       MAKEVARS: ...
     script: your_shell_script_command_here
+  - name: ...
+    wasm:
+      path: path/to/myplugin.wasm
+      import: your_function
 ```
 
-In this structure:
+Within this configuration:
 
-- `name` is the name of the function you're adding, which can be directly called within your Jinja2 templates.
-- `params` lists the parameters your function or filter requires. For filters, the default input (representing the value being filtered) is accessed using `$(input)`.
-- `env` sets environment variables that the shell command will have access to when executed. This is useful for customizing the behavior of your scripts based on the environment.
-- `script` contains the shell command that the function will execute when called.
+- `name`: Represents the name of the function you're adding, which can be invoked directly within your Jinja2 templates.
+- `params`: Enumerates the parameters your function or filter mandates. For filters, access the default input (symbolizing the value being filtered) using $(input).
+- `env`: Dictates environment variables to which the shell command will have access upon execution. This is pivotal when tailoring the behavior of your scripts contingent on the environment.
+- `script`: Incorporates the shell command that gets executed when the function is called.
+- `wasm`: Specifies Wasm plugin configurations. Within this:
+  - `path`: Points to the wasm binary encapsulating the plugin functions.
+  - `import`: Denotes the specific plugin function encapsulated within the wasm binary.
 
 ## Filters and Functions
 
