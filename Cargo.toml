@@ -27,11 +27,8 @@ toml = "0.8.0"
 anyhow = "1.0"
 log = "0.4"
 env_logger = "0.10"
-plugin = { git = "https://github.com/fantajeon/jintemplify", branch = "feat/wasm", package = "plugin", version = "*" }
+plugin = { git = "https://github.com/fantajeon/jintemplify-plugin", package = "plugin", version = "*" }
 wasmtime = "13.0.0"
-
-[patch.crates-io]
-plugin = { path = "./plugin" }
 
 [profile.release]
 opt-level = "z"
