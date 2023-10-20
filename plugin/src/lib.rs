@@ -1,5 +1,3 @@
-extern crate alloc;
-
 use serde::Serialize;
 
 #[macro_export]
