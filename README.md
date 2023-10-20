@@ -1,6 +1,6 @@
 # Jintemplify
 
-`jintemplify` is a CLI(Command Line Interface) tool that enables users to combine Jinja2([rust Tera library](https://keats.github.io/tera/)) templates with YAML variables, producing files in any desired format, including Dockerfiles and Makefiles. Designed for flexibility, `jintemplify` seamlessly integrates with Jenkins, Tekton, and other CI(Continuous Integration) systems in modern DevOps workflows. The application also supports a plugin system based on shell scripts and Webassembler(WASM) modules, allowing users to extend its functionality with familiar scripting techniques.
+`jintemplify` is a CLI(Command Line Interface) tool that enables users to combine Jinja2([rust Tera library](https://keats.github.io/tera/)) templates with YAML variables, producing files in any desired format, including Dockerfiles and Makefiles. Designed for flexibility, `jintemplify` seamlessly integrates with Jenkins, Tekton, and other CI(Continuous Integration) systems in modern DevOps workflows. The application also supports a plugin system based on shell scripts and Webassembly(WASM) modules, allowing users to extend its functionality with familiar scripting techniques.
 
 ## Features
 
