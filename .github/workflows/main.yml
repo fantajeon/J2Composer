@@ -69,7 +69,7 @@ jobs:
 
       - name: Build APK package inside Alpine container
         run: |
-          docker run --rm -v $(pwd):/workspace -v $(pwd)/output:/home/builder/packages -w /workspace alpine:latest /bin/ash -c "\
+          docker run --rm -v $(pwd):/workspace -v $(pwd)/output:/home/builder/packages -w /workspace/build alpine:latest /bin/ash -c "\
             apk add alpine-sdk cargo && \
             adduser -D -G abuild builder && \
             chown -R builder /workspace && \
