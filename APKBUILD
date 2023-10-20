@@ -13,14 +13,12 @@ subpackages=""
 
 build() {
     echo "try build ${builddir}"
-    cd "$builddir"
     cp -a /workspace/* .
     cargo build --release
 }
 
 package() {
     echo "try package $pkgdir"
-    cd "$builddir"
     install -Dm755 target/release/jintemplify "$pkgdir/usr/bin/jintemplify"
 }
 
