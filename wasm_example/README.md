@@ -23,7 +23,7 @@ crate-type = ["cdylib"]
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1"
 plugin_macro = { git = "https://github.com/fantajeon/jintemplify-plugin", package = "plugin_macro", version = "*" }
-plugin = { git = "https://github.com/fantajeon/jintemplify-plugin", package = "plugin", version = "*" }
+jintemplify_plugin = { git = "https://github.com/fantajeon/jintemplify-plugin", package = "plugin", version = "*" }
 
 ```
 
@@ -33,7 +33,7 @@ Inside your `lib.rs` file, start defining your plugin:
 
 ```rust
 // Import the required macro for Wasm plugin functionality.
-plugin::guest_plugin!();
+jintemplify_plugin::guest_plugin!();
 
 // Define your input type.
 #[allow(dead_code)]

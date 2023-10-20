@@ -1,6 +1,6 @@
 use serde::Deserialize;
 
-plugin::guest_plugin!();
+jintemplify_plugin::guest_plugin!();
 
 #[allow(dead_code)]
 #[derive(Deserialize)]

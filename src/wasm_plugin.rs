@@ -1,13 +1,13 @@
 use crate::ast::{Executable, WasmDeclartion, WasmFilter, WasmFunction};
+use jintemplify_plugin;
 use log::{debug, info};
-use plugin;
 use std::collections::HashMap;
 use std::slice;
 use std::str;
 use tera;
 use wasmtime::*;
 
-plugin::host_plugin!();
+jintemplify_plugin::host_plugin!();
 
 impl Executable for WasmFunction {
     fn execute(
@@ -125,7 +125,7 @@ impl<'a> WasmExecutor<'a> {
             Some(v) => vec![serde_json::json!(v), serde_json::json!(arg)],
             None => vec![serde_json::json!(arg)],
         };
-        serde_json::json!(plugin::InputWrapper { params: params })
+        serde_json::json!(jintemplify_plugin::InputWrapper { params: params })
     }
 
     pub fn execute(
@@ -155,7 +155,7 @@ impl<'a> WasmExecutor<'a> {
         )?;
 
         let result_ptr = ptr as usize;
-        let result_len = std::mem::size_of::<plugin::ReturnValues>();
+        let result_len = std::mem::size_of::<jintemplify_plugin::ReturnValues>();
 
         let memory_slice = unsafe {
             std::slice::from_raw_parts_mut(
@@ -164,8 +164,8 @@ impl<'a> WasmExecutor<'a> {
             )
         };
 
-        let return_values: &mut plugin::ReturnValues =
-            unsafe { &mut *(memory_slice.as_mut_ptr() as *mut plugin::ReturnValues) };
+        let return_values: &mut jintemplify_plugin::ReturnValues =
+            unsafe { &mut *(memory_slice.as_mut_ptr() as *mut jintemplify_plugin::ReturnValues) };
 
         debug!(
             "return_values={}, len={}",
@@ -184,12 +184,12 @@ impl<'a> WasmExecutor<'a> {
 
         self.free_return_values(ptr);
 
-        let output: plugin::OutputWrapper = match serde_json::from_str(result_str) {
+        let output: jintemplify_plugin::OutputWrapper = match serde_json::from_str(result_str) {
             Ok(val) => val,
             Err(err) => return Err(anyhow::anyhow!(err)),
         };
 
-        debug!("plugin::OutputWrapper :{:?}", output);
+        debug!("jintemplify_plugin::OutputWrapper :{:?}", output);
         Ok(output.result)
     }
 }
