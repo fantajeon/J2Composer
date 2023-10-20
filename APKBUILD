@@ -9,18 +9,17 @@ depends=""
 makedepends="cargo"
 install=""
 subpackages=""
-source="$pkgname-$pkgver::git+https://github.com/fantajeon/jintemplify.git#tag=v$pkgver"
+#source="$pkgname-$pkgver::git+https://github.com/fantajeon/jintemplify.git#tag=v$pkgver"
 
 build() {
     echo "try build ${builddir}"
-    [ -f "/workspace/Cargo.toml" ] && rm "/workspace/Cargo.toml"
-    cd "$builddir"
+    #cd "$builddir"
     cargo build --release
 }
 
 package() {
     echo "try package $pkgdir"
-    cd "$builddir"
+    #cd "$builddir"
     install -Dm755 target/release/jintemplify "$pkgdir/usr/bin/jintemplify"
 }
 
