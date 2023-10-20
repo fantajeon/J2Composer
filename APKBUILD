@@ -19,6 +19,7 @@ build() {
 }
 
 package() {
+    echo "try package $pkgdir"
     cd "$builddir"
     install -Dm755 target/release/jintemplify "$pkgdir/usr/bin/jintemplify"
 }
