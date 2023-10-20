@@ -114,6 +114,7 @@ impl Plugin {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::ast::Param;
     use tera::Value;
 
     #[test]
