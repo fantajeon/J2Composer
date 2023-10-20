@@ -9,7 +9,7 @@ depends=""
 makedepends="cargo"
 install=""
 subpackages=""
-source="$pkgname-$pkgver::git+https://github.com/fantajeon/jintemplify.git#tag=v$pkgver"
+source="$pkgname-$pkgver.tar.gz::https://github.com/fantajeon/jintemplify/archive/refs/tags/v$pkgver.tar.gz"
 
 build() {
     echo "try build ${builddir}"
@@ -24,4 +24,4 @@ package() {
     install -Dm755 target/release/jintemplify "$pkgdir/usr/bin/jintemplify"
 }
 
-sha512sums=""
+sha512sums="SKIP"
