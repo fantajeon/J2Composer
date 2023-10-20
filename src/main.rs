@@ -20,7 +20,7 @@ mod command;
 mod function;
 mod shell_plugin;
 mod wasm_plugin;
-
+use anyhow::Context as _Context;
 struct Args {
     envs: HashMap<String, String>,
     template: String,
@@ -179,7 +179,13 @@ fn add_templates_from_dir(tera: &mut Tera, dir: &Path, alias: Option<&str>) -> a
             "added tempate: {:?} => {:?}",
             template_name, template_name_with_alias
         );
-        tera.add_template_files(vec![(file, Some(template_name_with_alias))])?;
+        tera.add_template_files(vec![(file.clone(), Some(template_name_with_alias.clone()))])
+            .with_context(|| {
+                format!(
+                    "Failed to add jinja template from file {:?} under {:?} as {}",
+                    file, dir, template_name_with_alias
+                )
+            })?;
     }
 
     Ok(())
