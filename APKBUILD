@@ -12,6 +12,8 @@ subpackages=""
 source="$pkgname-$pkgver.tar.gz::https://github.com/fantajeon/jintemplify/archive/refs/tags/v$pkgver.tar.gz"
 
 build() {
+    echo "try build ${builddir}"
+    [ -f "/workspace/Cargo.toml" ] && rm "/workspace/Cargo.toml"
     cd "$builddir"
     cargo build --release
 }
