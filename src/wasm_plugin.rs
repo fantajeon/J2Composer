@@ -148,9 +148,7 @@ impl<'a> WasmExecutor<'a> {
         let function = self
             .instance
             .get_typed_func::<(u32, u32), u32>(&mut self.store, &self.func_decl.wasm.import)?;
-        //.get_func(&mut self.store, &self.func_decl.wasm.import)
 
-        //println!("run funciton.call");
         let ptr = function.call(
             &mut self.store,
             (input_ptr as u32, input_bytes.len() as u32),
