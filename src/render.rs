@@ -1,16 +1,20 @@
 use anyhow::{self, Context as _Context};
-use tera::{Context, Tera};
 use std::collections::HashMap;
+use tera::{Context, Tera};
 
-pub fn render_template(tera: &mut Tera, template_path: &str, context: &Context) -> anyhow::Result<String> {
+pub fn render_template(
+    tera: &mut Tera,
+    template_path: &str,
+    context: &Context,
+) -> anyhow::Result<String> {
     let template_content =
         std::fs::read_to_string(template_path).context("Failed to read template file")?;
     tera.add_raw_template(template_path, &template_content)
         .context("Failed to add template")?;
 
-    tera.render(template_path, context).with_context(|| format!("Failed to render template: {}", template_path))
+    tera.render(template_path, context)
+        .with_context(|| format!("Failed to render template: {}", template_path))
 }
-
 
 pub fn render_variables(
     tera: &mut Tera,
@@ -18,7 +22,7 @@ pub fn render_variables(
     context: &Context,
 ) -> anyhow::Result<HashMap<String, serde_yaml::Value>> {
     if variables_path.is_none() {
-        return Ok(HashMap::new()); // 바로 빈 HashMap을 반환
+        return Ok(HashMap::new());
     }
 
     let path = variables_path.ok_or_else(|| anyhow::anyhow!("variables_path is None"))?;

@@ -33,3 +33,7 @@ wasmtime = "13.0.0"
 [profile.release]
 opt-level = "z"
 lto = true
+
+[workspace]
+resolver = "2"
+members = ["wasm_example", "wasm_tester"]

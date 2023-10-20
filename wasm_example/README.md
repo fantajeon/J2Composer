@@ -22,8 +22,8 @@ crate-type = ["cdylib"]
 [dependencies]
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1"
-jintemplify_plugin_macro = { git = "https://github.com/fantajeon/jintemplify-plugin", package = "plugin_macro", version = "*" }
-jintemplify_plugin = { git = "https://github.com/fantajeon/jintemplify-plugin", package = "plugin", version = "*" }
+jintemplify_plugin_macro = { git = "https://github.com/fantajeon/jintemplify-plugin", package = "jintemplify_plugin_macro", version = "*" }
+jintemplify_plugin = { git = "https://github.com/fantajeon/jintemplify-plugin", package = "jintemplify_plugin", version = "*" }
 
 ```
 
@@ -104,13 +104,13 @@ To compile your project to WebAssembly, you'll need to add the `wasm32-unknown-u
 rustup target add wasm32-unknown-unknown
 ```
 
-Next, compile your project:
+Next, compile your project with `--target wasm32-unknown-unknown`:
 
 ```bash
 cargo build --release --target wasm32-unknown-unknown
 ```
 
-Note: After compiling, your WebAssembly output (.wasm file) will be located in the target/wasm32-unknown-unknown/release/ directory.
+Note: After compiling, your WebAssembly output (.wasm file) will be located in the `target/wasm32-unknown-unknown/release/` directory.
 
 ## 5. Write plugin.yaml.j2 and tester.j2 with jintemplify
 
