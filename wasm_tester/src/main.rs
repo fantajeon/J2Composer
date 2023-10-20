@@ -14,7 +14,7 @@ struct PluginConfig {
     filter: Vec<FilterDeclaration>,
 }
 
-plugin::host_plugin!();
+jintemplify_plugin::host_plugin!();
 
 fn load_config() -> anyhow::Result<PluginConfig> {
     let config_str = std::fs::read_to_string("plugin.yaml")?;
