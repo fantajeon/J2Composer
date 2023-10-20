@@ -43,7 +43,7 @@ functions:
 Within this configuration:
 
 - `name`: Represents the name of the function you're adding, which can be invoked directly within your Jinja2 templates.
-- `params`: Enumerates the parameters your function or filter mandates. For filters, access the default input (symbolizing the value being filtered) using $(input).
+- `params`: Enumerates the parameters your function or filter mandates. For filters, access the default input (symbolizing the value being filtered) using `$(input)`.
 - `env`: Dictates environment variables to which the shell command will have access upon execution. This is pivotal when tailoring the behavior of your scripts contingent on the environment.
 - `script`: Incorporates the shell command that gets executed when the function is called.
 - `wasm`: Specifies Wasm plugin configurations. Within this:
