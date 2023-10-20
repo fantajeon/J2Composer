@@ -76,6 +76,7 @@ jobs:
             chown -R builder /var/cache/distfiles/ && \
             su builder -c 'abuild-keygen -a -n' && \
             cp /home/builder/.abuild/*.rsa.pub /etc/apk/keys/ && \
+            cp /workspace/APKBUILD . && \
             su builder -c 'abuild checksum' && \
             su builder -c 'abuild -r'
           "
