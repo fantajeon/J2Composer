@@ -77,6 +77,7 @@ jobs:
             cp /home/builder/.abuild/*.rsa.pub /etc/apk/keys/ && \
             cp /workspace/APKBUILD . && \
             chown -R builder /apk_workspace && \
+            chown -R builder /home/builder/packages && \
             su builder -c 'abuild checksum' && \
             su builder -c 'abuild -r'
           "
