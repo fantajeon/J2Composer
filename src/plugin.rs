@@ -1,101 +1,85 @@
 // src/plugin.rs
-use crate::command::execute_shell_command;
+use crate::ast::{
+    Executable, ExecutableFunction, FilterDeclaration, FunctionDeclaration, WasmDeclartion,
+    WasmFilter, WasmFunction,
+};
 use crate::render::render_template;
+use crate::shell_plugin::{ShellCommand, ShellFilter, ShellFunction};
 use anyhow::{self, Context as _Context};
-use log::{debug, error, info};
+use log::debug;
 use serde::Deserialize;
 use std::collections::HashMap;
 use tera::{Context, Filter, Function, Tera};
 
-#[derive(Debug, Deserialize)]
-pub struct Param {
-    pub name: String,
-    pub description: Option<String>,
-    pub default: Option<String>,
-}
+impl FunctionDeclaration {
+    pub fn create(&self) -> anyhow::Result<ExecutableFunction> {
+        let executor: Box<dyn Executable> = if let Some(wasm_config) = &self.wasm {
+            Box::new(WasmFunction {
+                decl: WasmDeclartion {
+                    wasm: wasm_config.clone(),
+                    params: self.params.clone(),
+                },
+            })
+        } else {
+            Box::new(ShellFunction {
+                command: ShellCommand {
+                    script: self.script.as_ref().unwrap().clone(),
+                    params: self.params.clone(),
+                    env: self.env.clone(),
+                },
+            })
+        };
 
-#[derive(Debug, Deserialize)]
-pub struct FunctionDeclartion {
-    pub name: String,
-    pub params: Option<Vec<Param>>,
-    pub env: Option<HashMap<String, String>>,
-    pub description: Option<String>,
-    pub script: String,
-}
-
-#[derive(Debug, Deserialize)]
-pub struct FilterDeclaration {
-    pub name: String,
-    pub params: Option<Vec<Param>>,
-    pub env: Option<HashMap<String, String>>,
-    pub description: Option<String>,
-    pub script: String,
-}
-
-fn replace_placeholder(
-    cmd: &mut String,
-    param: &Param,
-    args: &HashMap<String, tera::Value>,
-) -> tera::Result<()> {
-    if !args.contains_key(&param.name) && param.default.is_none() {
-        return Err(tera::Error::msg(format!(
-            "Parameter '{}' not provided and no default value is set.",
-            param.name
-        )));
+        Ok(ExecutableFunction {
+            executor,
+            name: self.name.clone(),
+        })
     }
-    let placeholder = format!("$({})", param.name);
-    let value_str = args
-        .get(&param.name)
-        .map(|v| v.to_string())
-        .unwrap_or_else(|| param.default.as_ref().unwrap().clone());
-    *cmd = cmd.replace(&placeholder, &value_str);
-    Ok(())
 }
-
-fn prepare_command(
-    script: &str,
-    params: &Option<Vec<Param>>,
-    args: &HashMap<String, tera::Value>,
-) -> tera::Result<String> {
-    let mut cmd = script.clone().to_string();
-    if let Some(parameters) = params {
-        for param in parameters {
-            replace_placeholder(&mut cmd, param, args)?;
-        }
-    }
-    Ok(cmd)
-}
-
-fn prepare_command_filter(
-    script: &str,
-    params: &Option<Vec<Param>>,
-    value: &tera::Value,
-    args: &HashMap<String, tera::Value>,
-) -> tera::Result<String> {
-    let mut cmd = script.clone().to_string();
-    if let Some(parameters) = params {
-        for param in parameters {
-            // input은 value로 직접 처리되므로 이를 건너뛰기
-            if param.name != "input" {
-                replace_placeholder(&mut cmd, param, args)?;
-            } else {
-                cmd = cmd.replace("$(input)", &value.to_string());
-            }
-        }
-    }
-    Ok(cmd)
-}
-
-impl Function for FunctionDeclartion {
+impl Function for ExecutableFunction {
     fn call(&self, args: &HashMap<String, tera::Value>) -> tera::Result<tera::Value> {
         debug!("function call: {}, params={:?}", self.name, args);
-        let cmd = prepare_command(&self.script, &self.params, args)?;
-        let result = execute_shell_command(&cmd, &self.env, None)?;
-        Ok(tera::Value::String(result))
+        let result = self.executor.execute(args, None)?;
+        Ok(result)
     }
 }
 
-impl Filter for FilterDeclaration {
+impl FilterDeclaration {
+    pub fn create(&self) -> anyhow::Result<ExecutableFilter> {
+        let executor: Box<dyn Executable> = match (&self.wasm, &self.script) {
+            (Some(wasm_config), _) => Box::new(WasmFilter {
+                decl: WasmDeclartion {
+                    wasm: wasm_config.clone(),
+                    params: self.params.clone(),
+                },
+            }),
+            (None, Some(script)) => Box::new(ShellFilter {
+                command: ShellCommand {
+                    script: script.clone(),
+                    params: self.params.clone(),
+                    env: self.env.clone(),
+                },
+            }),
+            (None, None) => {
+                return Err(anyhow::anyhow!(
+                    "Neither wasm nor script configurations were provided"
+                ));
+            }
+        };
+
+        Ok(ExecutableFilter {
+            executor,
+            name: self.name.clone(),
+        })
+    }
+}
+
+pub struct ExecutableFilter {
+    executor: Box<dyn Executable>,
+    name: String,
+}
+
+impl Filter for ExecutableFilter {
     fn filter(
         &self,
         value: &tera::Value,
@@ -105,15 +89,14 @@ impl Filter for FilterDeclaration {
             "filter call: {}, params={:?}, value={:?}",
             self.name, args, value
         );
-        let cmd = prepare_command_filter(&self.script, &self.params, value, args)?;
-        let result = execute_shell_command(&cmd, &self.env, None)?;
-        Ok(tera::Value::String(result))
+        let result = self.executor.execute(args, Some(value))?;
+        Ok(result)
     }
 }
 
 #[derive(Debug, Deserialize)]
 pub struct Plugin {
-    pub functions: Option<Vec<FunctionDeclartion>>,
+    pub functions: Option<Vec<FunctionDeclaration>>,
     pub filters: Option<Vec<FilterDeclaration>>,
 }
 
@@ -135,7 +118,7 @@ mod tests {
 
     #[test]
     fn test_plugin_function_call() {
-        let func = FunctionDeclartion {
+        let func_decl = FunctionDeclaration {
             name: "echo_test".to_string(),
             params: Some(vec![Param {
                 name: "msg".to_string(),
@@ -144,7 +127,8 @@ mod tests {
             }]),
             description: None,
             env: None,
-            script: "echo $(msg)".to_string(),
+            wasm: None,
+            script: Some("echo $(msg)".to_string()),
         };
 
         let mut args = HashMap::new();
@@ -153,6 +137,7 @@ mod tests {
             Value::String("Hello, world!".to_string()),
         );
 
+        let func = func_decl.create().unwrap();
         let result = func.call(&args).unwrap();
         assert_eq!(result, Value::String("Hello, world!\n".to_string()));
     }
