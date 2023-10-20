@@ -13,7 +13,8 @@ subpackages=""
 
 build() {
     echo "try build ${builddir}"
-    #cd "$builddir"
+    cd "$builddir"
+    cp -a /workspace/* .
     cargo build --release
 }
 
