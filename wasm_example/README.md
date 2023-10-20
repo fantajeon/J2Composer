@@ -2,15 +2,7 @@
 
 This guide will walk you through the creation of a WebAssembly (Wasm) plugin using Rust. For a more detailed example, refer to the `wasm_example` project.
 
-## 1. Clone the Repository
-
-First, clone the repository containing the essential tools:
-
-```bash
-git clone https://github.com/fantajeon/jintemplify
-```
-
-## 2. Set Up Your Rust Library Project
+## 1. Set Up Your Rust Library Project
 
 Your Rust project should be set up as a library. This means your main file should be `lib.rs`. If you've initialized your project using `cargo new`, ensure you use the `--lib` flag:
 
@@ -19,7 +11,7 @@ cargo new your_project_name --lib
 cd your_project_name
 ```
 
-## 3. Update Cargo.toml
+## 2. Update Cargo.toml
 
 Add the necessary dependencies and library paths to your `Cargo.toml`:
 
@@ -30,17 +22,18 @@ crate-type = ["cdylib"]
 [dependencies]
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1"
-plugin_macro = { path = "../jintemplify/plugin_macro" }
-plugin = { path = "../jintemplify/plugin" }
+jintemplify_plugin_macro = { git = "https://github.com/fantajeon/jintemplify-plugin", package = "plugin_macro", version = "*" }
+jintemplify_plugin = { git = "https://github.com/fantajeon/jintemplify-plugin", package = "plugin", version = "*" }
+
 ```
 
-## 4. Implement Your Plugin in lib.rs
+## 3. Implement Your Plugin in lib.rs
 
 Inside your `lib.rs` file, start defining your plugin:
 
 ```rust
 // Import the required macro for Wasm plugin functionality.
-plugin::guest_plugin!();
+jintemplify_plugin::guest_plugin!();
 
 // Define your input type.
 #[allow(dead_code)]
@@ -57,7 +50,7 @@ pub struct YourReturnType {
 }
 
 // Define your plugin function.
-#[plugin_macro::plugin_function]
+#[jintemplify_plugin_macro::plugin_function]
 pub fn your_plugin(input: YourInputType) -> YourReturnType {
     // ... your plugin logic here ...
 }
@@ -76,7 +69,7 @@ YourParameterType {
 }
 
 // Define your plugin filter, if required.
-#[plugin_macro::plugin_filter]
+#[jintemplify_plugin_macro::plugin_filter]
 pub fn your_plugin_filter(value: YourValueInputType, input: YourParameterType) -> YourReturnType {
     // ... your filter logic here ...
 }
@@ -103,7 +96,7 @@ In practice, when you use a filter in Jinja, it works somewhat like this: `value
 
 Remember to keep these data structures lean and only include fields that are essential to your plugin's operation. This ensures flexible data transfer (through `JSON-serialization`) and efficient processing within the Wasm environment.
 
-## 5. Compile
+## 4. Compile Wasm
 
 To compile your project to WebAssembly, you'll need to add the `wasm32-unknown-unknown` target architecture:
 
@@ -119,7 +112,7 @@ cargo build --release --target wasm32-unknown-unknown
 
 Note: After compiling, your WebAssembly output (.wasm file) will be located in the target/wasm32-unknown-unknown/release/ directory.
 
-## 6. Write plugin.yaml.j2 and tester.j2
+## 5. Write plugin.yaml.j2 and tester.j2 with jintemplify
 
 ### plugin.yaml.j2
 
