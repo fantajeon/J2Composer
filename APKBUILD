@@ -9,11 +9,10 @@ depends=""
 makedepends="cargo"
 install=""
 subpackages=""
-source="$pkgname-$pkgver.tar.gz::https://github.com/fantajeon/jintemplify/archive/refs/tags/v$pkgver.tar.gz"
+source=""
 
 build() {
     echo "try build ${builddir}"
-    [ -f "/workspace/Cargo.toml" ] && rm "/workspace/Cargo.toml"
     cd "$builddir"
     cargo build --release
 }
