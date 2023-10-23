@@ -71,6 +71,7 @@ jobs:
         run: |
           ls -al examples/apkbuild/
           cargo install --path .
+          cargo clean
           jintemplify --template examples/apkbuild/APKBUILD.j2  \
             --output-file APKBUILD
 
