@@ -22,7 +22,7 @@ fn prepare_command(
     params: &Option<Vec<Param>>,
     args: &HashMap<String, tera::Value>,
 ) -> tera::Result<String> {
-    let mut cmd = script.clone().to_string();
+    let mut cmd = script.to_string();
     if let Some(parameters) = params {
         for param in parameters {
             replace_placeholder(&mut cmd, param, args)?;
@@ -53,7 +53,7 @@ pub fn prepare_command_filter(
     value: &tera::Value,
     args: &HashMap<String, tera::Value>,
 ) -> tera::Result<String> {
-    let mut cmd = script.clone().to_string();
+    let mut cmd = script.to_string();
     if let Some(parameters) = params {
         for param in parameters {
             debug!("prepare_command_filter: check={}", param.name);
