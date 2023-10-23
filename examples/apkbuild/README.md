@@ -33,3 +33,5 @@ package() {
 
 sha512sums="SKIP"
 ```
+
+There is an actual example at apline_build in .github/workflows/main.yaml for CI.
