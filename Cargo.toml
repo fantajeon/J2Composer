@@ -2,7 +2,7 @@
 name = "jintemplify"
 version = "0.1.8"
 edition = "2021"
-description = "A CLI tool to compose files using tera-based Jinja2 templates and YAML variables."
+description = "A CLI tool to compose files using rust tera-based Jinja2 templates and YAML variables."
 license = "MIT"
 repository = "https://github.com/fantajeon/jintemplify"
 homepage = "https://github.com/fantajeon/jintemplify"
@@ -28,7 +28,7 @@ anyhow = "1.0"
 log = "0.4"
 env_logger = "0.10"
 jintemplify_plugin = { git = "https://github.com/fantajeon/jintemplify-plugin", package = "jintemplify_plugin", version = "0.1.0" }
-wasmtime = "13.0.0"
+wasmtime = "14.0.0"
 
 [profile.release]
 opt-level = "z"
