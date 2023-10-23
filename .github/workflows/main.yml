@@ -69,8 +69,8 @@ jobs:
 
       - name: Generate APKBuild(for example)
         run: |
-          cargo install --path .
           ls -al examples/apkbuild/
+          cargo install --path .
           jintemplify --template examples/apkbuild/APKBUILD.j2  \
             --output-file APKBUILD
 
