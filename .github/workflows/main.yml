@@ -71,7 +71,7 @@ jobs:
         comment: Uneffecient process due to cargo build twice, but it's good for an real example and testing.
         run: |
           cargo install --path .
-          jintemplify --template ./examples/apkbuild/APKBUILD.j2  \
+          jintemplify --template examples/apkbuild/APKBUILD.j2  \
             --output-file APKBUILD
 
       - name: Build APK package inside Alpine container
