@@ -67,6 +67,12 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
+      - name: Generate APKBuild
+        run: |
+          cargo install --path .
+          jintemplify --template ./examples/apkbuild/APKBUILD.j2  \
+            --output-file APKBUILD
+
       - name: Build APK package inside Alpine container
         run: |
           docker run --rm -v $(pwd):/workspace -v $(pwd)/output:/home/builder/packages -w /apk_workspace alpine:latest /bin/ash -c "\

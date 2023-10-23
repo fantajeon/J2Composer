@@ -1,0 +1,26 @@
+{%- set cargo_conf=read_file(file_path="./Cargo.toml") | from_toml -%}
+pkgname={{cargo_conf['package']['name']}}
+pkgver={{cargo_conf['package']['version']}}
+pkgrel=0
+pkgdesc="Template tool generating formats using Jinja2 & YAML"
+url={{cargo_conf['package']['repository']}}
+arch="all"
+license={{cargo_conf['package']['license']}}
+depends=""
+makedepends="cargo"
+install=""
+subpackages=""
+#source="$pkgname-$pkgver::git+{{cargo_conf['package']['repository']}}#tag=v$pkgver"
+
+build() {
+    cp -a /workspace/* .
+    cargo clean
+    cargo build --release
+}
+
+package() {
+    echo "try package $pkgdir"
+    install -Dm755 target/release/jintemplify "$pkgdir/usr/bin/jintemplify"
+}
+
+sha512sums="SKIP"
