@@ -68,7 +68,6 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Generate APKBuild(for example)
-        comment: Uneffecient process due to cargo build twice, but it's good for an real example and testing.
         run: |
           cargo install --path .
           jintemplify --template examples/apkbuild/APKBUILD.j2  \
