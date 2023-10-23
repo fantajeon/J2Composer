@@ -56,16 +56,16 @@ With `jintemplify`, you're not limited to just basic Jinja2 templating. We've in
 
 ### Functions
 
-- **Reading Files Directly**: With the read_file function, you can directly read the contents of a file into your Jinja2 template. This is especially useful for including large chunks of data or content without manually copying them into the template.
+- **Reading Files Directly**: With the `read_file(file_path="...")` function, you can directly read the contents of a file into your Jinja2 template. This is especially useful for including large chunks of data or content without manually copying them into the template.
 - **Converting Arrays to Objects**: With the `to_object` filter, you can convert arrays with alternating keys and values (e.g., `[key1, value1, key2, value2]`) into a Jinja2 accessible object (`{key1: value1, key2: value2}`).
 - **Executing Shell Commands**: With the `shell` function, you can directly execute shell commands from within your Jinja2 template. This can be especially useful for dynamic content generation based on command outputs. For example, `shell("echo hello", world="Jinja")` will set the environment variable `world` to "Jinja" before executing the `echo hello` command.
 
 ### Filters
 
 - **Reading From Strings**: If you have data embedded within your templates as strings, you can convert them into usable Jinja2 objects with the following filters:
-  - `from_read_json`: Parse a JSON string and convert it to a Jinja2 object.
-  - `from_read_yaml`: Parse a YAML string and convert it to a Jinja2 object.
-  - `from_read_toml`: Parse a TOML string and convert it to a Jinja2 object.
+  - `from_json`: Parse a JSON string and convert it to a Jinja2 object.
+  - `from_yaml`: Parse a YAML string and convert it to a Jinja2 object.
+  - `from_toml`: Parse a TOML string and convert it to a Jinja2 object.
 
 By using these filters, you can seamlessly integrate inline data within your templates and then manipulate them using Jinja2's powerful templating capabilities.
 
